@@ -1,3 +1,17 @@
+#
+# Manual additions:
+#
+
+# Don't want any secrets or private IDs on GitHub.
+Client ID.txt
+Client Secret.txt
+Redirect URI.txt
+
+
+#
+# Defaults:
+#
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
