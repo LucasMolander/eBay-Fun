@@ -20,90 +20,42 @@ General notes:
         * Common alterations (e.g. "Altered art")
 """
 
+def removeNonASCII(str):
+    out = []
+
+    for c in str:
+        out.append(c if ord(c) <128 else '')
+
+    return ''.join(out)
+
 import requests
+import re
 
-#
-# api.ebay.com/buy/browse/v1/item/{item_id}
-#
+searchURL = 'https://www.ebay.com/sch/i.html' # Base 'search' URL
+searchURL += '?&LH_Complete=1&LH_Sold=1'      # Sold auctions only
+searchURL += '&_nkw='                         # Put search string here
 
+cardName = 'Jace, the Mind Sculptor'
+cardName = re.sub(r' ', '%20', cardName)
 
+# print("Search string:")
+# print(searchString)
+# exit()
 
+finalURL = searchURL + cardName
 
-#
-# Get the client credentials.
-#
+# print("Final URL:")
+# print(finalURL)
 
-url = 'https://api.sandbox.ebay.com/identity/v1/oauth2/token'
+r = requests.get(finalURL)
+HTML = removeNonASCII(r.text)
 
-with open('Client ID.txt', 'r') as theFile:
-    clientID = theFile.read().replace('\n', '')
+HTML = re.sub(r' ', '', HTML)
+HTML = re.sub(r'\t', '', HTML)
+HTML = re.sub(r'\n', '', HTML)
 
-with open('Client Secret.txt', 'r') as theFile:
-    clientSecret = theFile.read().replace('\n', '')
+# print(HTML)
 
-auth = clientID + ':' + clientSecret
-
-headers = {'Content-Type'  : 'application/x-www-form-urlencoded', \
-           'Authorization' : 'Basic ' + auth}
-
-with open('Redirect URI.txt', 'r') as theFile:
-    redirectURI = theFile.read().replace('\n', '')
-
-#
-# These are the only scopes allowed for client (i.e. not user) authentication:
-#     - https://api.ebay.com/oauth/api_scope
-#     - https://api.ebay.com/oauth/api_scope/buy.guest.order
-#     - https://api.ebay.com/oauth/api_scope/buy.item.feedS
-#     - https://api.ebay.com/oauth/api_scope/buy.marketing
-#
-scope = 'https://api.ebay.com/oauth/api_scope' # "View public data from eBay"
-
-body = {'grant_type'   : clientID, \
-        'redirect_uri' : redirectURI, \
-        'scope'        : scope}
-
-
-
-
-# Try to log things.
-import requests
-import logging
-
-# These two lines enable debugging at httplib level (requests->urllib3->http.client)
-# You will see the REQUEST, including HEADERS and DATA, and RESPONSE with HEADERS but without DATA.
-# The only thing missing will be the response.body which is not logged.
-try:
-    import http.client as http_client
-except ImportError:
-    # Python 2
-    import httplib as http_client
-http_client.HTTPConnection.debuglevel = 1
-
-# You must initialize logging, otherwise you'll not see debug output.
-logging.basicConfig()
-logging.getLogger().setLevel(logging.DEBUG)
-requests_log = logging.getLogger("requests.packages.urllib3")
-requests_log.setLevel(logging.DEBUG)
-requests_log.propagate = True
-
-
-
-
-print('\n\n\nSending a POST request to URL:')
-print(url)
-print('With headers:')
-print(headers)
-print('And data:')
-print(body)
-print('\n\n\n')
-
-r = requests.post(url, headers=headers, data=body)
-
-print(r)
-print(type(r))
-from pprint import pprint
-pprint(vars(r))
-
-# r = requests.get('https://api.ebay.com/buy/browse/v1/item/v1|272940054280|0')
-# print(r)
-# print(type(r))
+# Find things that look like: <span class="bold bidsold">$50.00</span>
+matches = re.findall(r"bidsold\">\$\d*\.\d*</span>", HTML)
+print(matches)
