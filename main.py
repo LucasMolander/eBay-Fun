@@ -50,7 +50,7 @@ def pricesToNumbers(prices):
 
     return out
 
-def getMedianForSearchString(card):
+def getMedian(card):
     #
     # Perform a GET request for the web page.
     #
@@ -94,26 +94,190 @@ def getMedianForSearchString(card):
     # Just take the median for now
     return statistics.median(priceNumbers)
 
+def reportExpansion(pathToFile):
+    with open(pathToFile, 'r') as inFile:
+        rawContents = inFile.read().split('\n')
+
+    # This information is true regardless of the pack (Shards of Alara on).
+    pMythic   = 1.0 / 8.0
+    pRare     = 7.0 / 8.0
+    pUncommon = 3.0
+    pCommon   = 10.0
+
+    # Let's just let the foil multiplier be 2 for now
+    foilMultiplier = 2.0
+
+    # Get some basic info from the top of the file
+    setName = rawContents[0]
+    packsPerBox = int(rawContents[1])
+    pFoil = float(rawContents[2])
+
+    nMythics = int(rawContents[3])
+    nRares = int(rawContents[4])
+    nUncommons = int(rawContents[5])
+    nCommons = int(rawContents[6])
+    nAll = nMythics + nRares + nUncommons + nCommons
+
+    # Get indices for the cards
+    mStart = 8
+    mEnd = rawContents.index('RARES') - 1
+
+    rStart = mEnd + 2
+    rEnd = rawContents.index('UNCOMMONS') - 1
+
+    uStart = rEnd + 2
+    uEnd = rawContents.index('COMMONS') - 1
+
+    cStart = uEnd + 2
+    cEnd = len(rawContents) - 1
+
+    # Assign the cards
+    mythicNames = []
+    rareNames = []
+    uncommonNames = []
+    commonNames = []
+
+    for i in range(mStart, mEnd + 1):
+        mythicNames.append(rawContents[i])
+
+    for i in range(rStart, rEnd + 1):
+        rareNames.append(rawContents[i])
+
+    for i in range(uStart, uEnd + 1):
+        uncommonNames.append(rawContents[i])
+
+    for i in range(cStart, cEnd + 1):
+        commonNames.append(rawContents[i])
+
+    # # Print them out (for debugging purposes, for now)
+    # print('MYTHICS:')
+    # for n in mythicNames:
+    #     print(n)
+    # print('\n\nRARES:')
+    # for n in rareNames:
+    #     print(n)
+    # print('\n\nUNCOMMONS:')
+    # for n in uncommonNames:
+    #     print(n)
+    # print('\n\nCOMMONS:')
+    # for n in commonNames:
+    #     print(n)
+
+    # Figure out the prices!
+    mythicPrices = []
+    rarePrices = []
+    uncommonPrices = []
+    commonPrices = []
+
+    print('Mythic prices:')
+    for name in mythicNames:
+        med = getMedian(name + ' ' + setName)
+        mythicPrices.append(med)
+
+        # Debugging!
+        print(str(round(med, 2)) + '\t' + name)
+        sys.stdout.flush()
+
+    print('\n\nRare prices:')
+    for name in rareNames:
+        med = getMedian(name + ' ' + setName)
+        rarePrices.append(med)
+
+        # Debugging!
+        print(str(round(med, 2)) + '\t' + name)
+        sys.stdout.flush()
+
+    print('\n\nUncommon prices:')
+    for name in uncommonNames:
+        med = getMedian(name + ' ' + setName)
+        uncommonPrices.append(med)
+
+        # Debugging!
+        print(str(round(med, 2)) + '\t' + name)
+        sys.stdout.flush()
+
+    print('\n\nCommon prices:')
+    for name in commonNames:
+        med = getMedian(name + ' ' + setName)
+        commonPrices.append(med)
+
+        # Debugging!
+        print(str(round(med, 2)) + '\t' + name)
+        sys.stdout.flush()
+
+    # Averages
+    mythicTotal = sum(mythicPrices)
+    rareTotal = sum(rarePrices)
+    commonTotal = sum(uncommonPrices)
+    uncommonTotal = sum(commonPrices)
+    allTotal = mythicTotal + rareTotal + commonTotal + uncommonTotal
+
+    evMythic   = mythicTotal   / float(nMythics)
+    evRare     = rareTotal     / float(nRares)
+    evUncommon = commonTotal   / float(nUncommons)
+    evCommon   = uncommonTotal / float(nCommons)
+
+    print('\n\n')
+    print('Expected Mythic price:   ' + str(round(evMythic, 2)))
+    print('Expected Rare price:     ' + str(round(evRare, 2)))
+    print('Expected Uncommon price: ' + str(round(evUncommon, 2)))
+    print('Expected common price:   ' + str(round(evCommon, 2)))
+
+    evRandom = allTotal / float(nAll)
+    evFoil = evRandom * foilMultiplier
+
+    print('Expected foil price:     ' + str(round(evFoil, 2)))
+
+    evPerPack = (evMythic   * pMythic   +
+                 evRare     * pRare     +
+                 evUncommon * pUncommon +
+                 evCommon   * pCommon   +
+                 evFoil     * pFoil)
+
+    print('\n\nExpected value per pack: ' + str(round(evPerPack, 2)))
+
+    evPerBox = evPerPack * packsPerBox
+    print('\n\nExpected value per box:  ' + str(round(evPerBox, 2)))
+
+
+
+
 import sys
 import requests
 import re
 import statistics
 
-# jaceMedian = getMedianForSearchString('Jace, the Mind Sculptor Worldwake')
+
+
+reportExpansion('Expansions/Modern Masters 2017.txt')
+
+
+
+
+
+# jaceMedian = getMedian('Jace, the Mind Sculptor Worldwake')
 # print('\n\n\n\n\nJace median:')
 # print(jaceMedian)
 
-with open('Modern Masters 2013 RARES.txt', 'r') as inFile:
-    cards = inFile.read().split('\n')
 
-setName = cards[0]
-del cards[0]
 
-print('\nCards of note in ' + setName + ':')
-for card in cards:
-    med = getMedianForSearchString(card + ' ' + setName)
-    print(str(med) + '\t' + card)
-    sys.stdout.flush() # These might take a while
+
+
+# with open('Modern Masters 2013 RARES.txt', 'r') as inFile:
+#     cards = inFile.read().split('\n')
+
+# setName = cards[0]
+# del cards[0]
+
+# print('\nCards of note in ' + setName + ':')
+# for card in cards:
+#     med = getMedian(card + ' ' + setName)
+#     print(str(med) + '\t' + card)
+#     sys.stdout.flush() # These might take a while
+
+
+
+
 
 
 # #
