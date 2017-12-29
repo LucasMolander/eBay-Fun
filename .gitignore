@@ -7,6 +7,9 @@ Client ID.txt
 Client Secret.txt
 Redirect URI.txt
 
+# Don't want random files that help testing.
+out/
+
 
 #
 # Defaults:
