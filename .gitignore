@@ -8,7 +8,10 @@ Client Secret.txt
 Redirect URI.txt
 
 # Don't want random files that help testing.
-out/
+debug_out/
+
+# Don't want personal uses on GitHub.
+useful_out/
 
 
 #
