@@ -100,8 +100,8 @@ def getMedian(card):
     #
     # Try just taking the median of the five most recently-finished auctions.
     #
-    if (len(priceNumbers) > 5):
-        priceNumbers = priceNumbers[0:5]
+    # if (len(priceNumbers) > 5):
+    #     priceNumbers = priceNumbers[0:5]
 
 
     if (len(priceNumbers) > 0):
@@ -165,20 +165,6 @@ def reportExpansion(pathToFile):
 
     for i in range(cStart, cEnd + 1):
         commonNames.append(rawContents[i])
-
-    # # Print them out (for debugging purposes, for now)
-    # print('MYTHICS:')
-    # for n in mythicNames:
-    #     print(n)
-    # print('\n\nRARES:')
-    # for n in rareNames:
-    #     print(n)
-    # print('\n\nUNCOMMONS:')
-    # for n in uncommonNames:
-    #     print(n)
-    # print('\n\nCOMMONS:')
-    # for n in commonNames:
-    #     print(n)
 
     # Figure out the prices!
     mythicPrices = []
@@ -245,6 +231,12 @@ def reportExpansion(pathToFile):
 
     print('Expected foil price:     ' + str(round(evFoil, 2)))
 
+    print('\nMythics add:   ' + str(round((evMythic * pMythic), 2)))
+    print(  'Rares add:     ' + str(round((evRare * pRare), 2)))
+    print(  'Uncommons add: ' + str(round((evUncommon * pUncommon), 2)))
+    print(  'Commons add:   ' + str(round((evCommon * pCommon), 2)))
+    print(  'Foils add:     ' + str(round((evFoil * pFoil), 2)))
+
     evPerPack = (evMythic   * pMythic   +
                  evRare     * pRare     +
                  evUncommon * pUncommon +
@@ -266,12 +258,7 @@ import statistics
 
 
 
-# reportExpansion('Expansions/Modern Masters 2017.txt')
-# reportExpansion('Expansions/Shadows Over Innistrad.txt')
-# reportExpansion('Expansions/Iconic Masters.txt')
-# reportExpansion('Expansions/Modern Masters 2015.txt')
-reportExpansion('Expansions/Modern Masters 2013.txt')
-
+reportExpansion('Expansions/Hour of Devastation.txt')
 
 
 

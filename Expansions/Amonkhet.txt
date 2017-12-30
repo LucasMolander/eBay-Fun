@@ -1,0 +1,27 @@
+Amonkhet
+36
+0.166666666
+15
+53
+80
+101
+MYTHICS
+Hazoret the Fervent
+As Foretold
+Gideon of the Trials
+Rhonas the Indomitable
+Liliana, Death's Majesty
+Liliana, Death Wielder
+Gideon, Martial Paragon
+Angel of Sanctions
+Oketra the True
+RARES
+Anointed Procession
+Fetid Pools
+Glorybringer
+Irrigated Farmland
+Sheltered Thicket
+Regal Caracal
+Soul-Scar Mage
+UNCOMMONS
+COMMONS

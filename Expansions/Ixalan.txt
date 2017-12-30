@@ -1,0 +1,30 @@
+Ixalan
+36
+0.166666666
+15
+63
+80
+101
+MYTHICS
+Carnage Tyrant
+Vraska, Relic Seeker
+Huatli, Dinosaur Knight
+Jace, Ingenious Mind-Mage
+Huatli, Warrior Poet
+Gishath, Sun's Avatar
+Jace, Cunning Castaway
+Vona, Butcher of Magan
+RARES
+Search for Azcanta
+Vraska's Contempt
+Hostage Taker
+Drowned Catacomb
+Growing Rites of Itlimoc
+Rampaging Ferocidon
+Legion's Landing
+Rootbound Crag
+Glacial Fortress
+Treasure Map
+Dragonskull Summit
+UNCOMMONS
+COMMONS

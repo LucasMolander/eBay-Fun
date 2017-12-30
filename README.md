@@ -17,7 +17,9 @@ I also needed math support, and Python has some good math libraries.
 ## Libraries Used
 [Requests: HTTP for Humans](http://docs.python-requests.org)
 
-[Matplotlib](https://matplotlib.org/)
+## Package Dependencies
+requests, statistics, and multiprocessing (requires C++ compiler found
+[here](https://www.microsoft.com/en-us/download/confirmation.aspx?id=44266)).
 
 ## License
 MIT License
