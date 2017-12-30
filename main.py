@@ -92,7 +92,22 @@ def getMedian(card):
     #     print(priceN)
 
     # Just take the median for now
-    return statistics.median(priceNumbers)
+
+
+
+    #
+    # TEMPORARY:
+    #
+    # Try just taking the median of the five most recently-finished auctions.
+    #
+    if (len(priceNumbers) > 5):
+        priceNumbers = priceNumbers[0:5]
+
+
+    if (len(priceNumbers) > 0):
+        return statistics.median(priceNumbers)
+    else:
+        return 0
 
 def reportExpansion(pathToFile):
     with open(pathToFile, 'r') as inFile:
@@ -111,6 +126,8 @@ def reportExpansion(pathToFile):
     setName = rawContents[0]
     packsPerBox = int(rawContents[1])
     pFoil = float(rawContents[2])
+
+    print('\nCalculating the price of a ' + setName + ' booster box\n')
 
     nMythics = int(rawContents[3])
     nRares = int(rawContents[4])
@@ -249,8 +266,11 @@ import statistics
 
 
 
-reportExpansion('Expansions/Modern Masters 2017.txt')
-
+# reportExpansion('Expansions/Modern Masters 2017.txt')
+# reportExpansion('Expansions/Shadows Over Innistrad.txt')
+# reportExpansion('Expansions/Iconic Masters.txt')
+# reportExpansion('Expansions/Modern Masters 2015.txt')
+reportExpansion('Expansions/Modern Masters 2013.txt')
 
 
 
