@@ -3,28 +3,36 @@ This file contains short tests for sanity checks.
 """
 
 
-def my_function(nums):
-	return nums[0] * nums[1]
 
 
-#
-# Multithreading.
-#
+myArr = [1, 2, 3, 4, 5]
+print(myArr[0:2])
 
-my_array = []
-for i in range(0, 1000000):
-	my_array.append([i, i + 1])
 
-from multiprocessing.dummy import Pool as ThreadPool
-pool = ThreadPool(1)
-results = pool.map(my_function, my_array)
 
-# print('Results:')
-# for r in results:
-# 	print(r)
 
-# # Get rid of bookkeeping lines?
-# with Pool(8) as p: p.map( *whatever* )
+# #
+# # Multithreading.
+# #
+# def my_function(nums):
+# 	return nums[0] * nums[1]
+
+# my_array = []
+# for i in range(0, 1000000):
+# 	my_array.append([i, i + 1])
+
+# from multiprocessing.dummy import Pool as ThreadPool
+# pool = ThreadPool(8)
+# results = pool.map(my_function, my_array)
+
+# # print('Results:')
+# # for r in results:
+# # 	print(r)
+
+
+
+
+
 
 
 

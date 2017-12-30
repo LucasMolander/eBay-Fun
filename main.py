@@ -153,67 +153,73 @@ def reportExpansion(pathToFile):
     rareNames = []
     uncommonNames = []
     commonNames = []
+    allNames = []      # Work for multithreading
 
     for i in range(mStart, mEnd + 1):
         mythicNames.append(rawContents[i])
+        allNames.append(rawContents[i])
 
     for i in range(rStart, rEnd + 1):
         rareNames.append(rawContents[i])
+        allNames.append(rawContents[i])
 
     for i in range(uStart, uEnd + 1):
         uncommonNames.append(rawContents[i])
+        allNames.append(rawContents[i])
 
     for i in range(cStart, cEnd + 1):
         commonNames.append(rawContents[i])
+        allNames.append(rawContents[i])
 
-    # Figure out the prices!
-    mythicPrices = []
-    rarePrices = []
-    uncommonPrices = []
-    commonPrices = []
+    # Figure out the prices
+    # In a multithreaded way, of course. See the README for details.
+    pool = ThreadPool(8)
+    allPrices = pool.map(getMedian, allNames)
 
+    # Put the prices back into their categories.
+    cur = 0
+    nxt = len(mythicNames)
+    mythicPrices = allPrices[cur:nxt]
+
+    cur  = nxt
+    nxt += len(rareNames)
+    rarePrices = allPrices[cur:nxt]
+
+    cur  = nxt
+    nxt += len(uncommonNames)
+    uncommonPrices = allPrices[cur:nxt]
+
+    cur  = nxt
+    nxt += len(commonNames)
+    commonPrices = allPrices[cur:nxt]
+
+    # Print them out
     print('Mythic prices:')
-    for name in mythicNames:
-        med = getMedian(name + ' ' + setName)
-        mythicPrices.append(med)
-
-        # Debugging!
-        print(str(round(med, 2)) + '\t' + name)
+    for i in range(0, len(mythicNames)):
+        print(str(round(mythicPrices[i], 2)) + '\t' + mythicNames[i])
         sys.stdout.flush()
 
     print('\n\nRare prices:')
-    for name in rareNames:
-        med = getMedian(name + ' ' + setName)
-        rarePrices.append(med)
-
-        # Debugging!
-        print(str(round(med, 2)) + '\t' + name)
+    for i in range(0, len(rareNames)):
+        print(str(round(rarePrices[i], 2)) + '\t' + rareNames[i])
         sys.stdout.flush()
 
     print('\n\nUncommon prices:')
-    for name in uncommonNames:
-        med = getMedian(name + ' ' + setName)
-        uncommonPrices.append(med)
-
-        # Debugging!
-        print(str(round(med, 2)) + '\t' + name)
+    for i in range(0, len(uncommonNames)):
+        print(str(round(uncommonPrices[i], 2)) + '\t' + uncommonNames[i])
         sys.stdout.flush()
 
     print('\n\nCommon prices:')
-    for name in commonNames:
-        med = getMedian(name + ' ' + setName)
-        commonPrices.append(med)
-
-        # Debugging!
-        print(str(round(med, 2)) + '\t' + name)
+    for i in range(0, len(commonNames)):
+        print(str(round(commonPrices[i], 2)) + '\t' + commonNames[i])
         sys.stdout.flush()
 
     # Averages
-    mythicTotal = sum(mythicPrices)
-    rareTotal = sum(rarePrices)
-    commonTotal = sum(uncommonPrices)
+    mythicTotal   = sum(mythicPrices)
+    rareTotal     = sum(rarePrices)
+    commonTotal   = sum(uncommonPrices)
     uncommonTotal = sum(commonPrices)
-    allTotal = mythicTotal + rareTotal + commonTotal + uncommonTotal
+    allTotal      = mythicTotal + rareTotal + commonTotal + uncommonTotal
 
     evMythic   = mythicTotal   / float(nMythics)
     evRare     = rareTotal     / float(nRares)
@@ -231,11 +237,11 @@ def reportExpansion(pathToFile):
 
     print('Expected foil price:     ' + str(round(evFoil, 2)))
 
-    print('\nMythics add:   ' + str(round((evMythic * pMythic), 2)))
-    print(  'Rares add:     ' + str(round((evRare * pRare), 2)))
+    print('\nMythics add:   ' + str(round((evMythic   * pMythic),   2)))
+    print(  'Rares add:     ' + str(round((evRare     * pRare),     2)))
     print(  'Uncommons add: ' + str(round((evUncommon * pUncommon), 2)))
-    print(  'Commons add:   ' + str(round((evCommon * pCommon), 2)))
-    print(  'Foils add:     ' + str(round((evFoil * pFoil), 2)))
+    print(  'Commons add:   ' + str(round((evCommon   * pCommon),   2)))
+    print(  'Foils add:     ' + str(round((evFoil     * pFoil),     2)))
 
     evPerPack = (evMythic   * pMythic   +
                  evRare     * pRare     +
@@ -255,105 +261,6 @@ import sys
 import requests
 import re
 import statistics
+from multiprocessing.dummy import Pool as ThreadPool
 
-
-
-reportExpansion('Expansions/Hour of Devastation.txt')
-
-
-
-# jaceMedian = getMedian('Jace, the Mind Sculptor Worldwake')
-# print('\n\n\n\n\nJace median:')
-# print(jaceMedian)
-
-
-
-
-
-# with open('Modern Masters 2013 RARES.txt', 'r') as inFile:
-#     cards = inFile.read().split('\n')
-
-# setName = cards[0]
-# del cards[0]
-
-# print('\nCards of note in ' + setName + ':')
-# for card in cards:
-#     med = getMedian(card + ' ' + setName)
-#     print(str(med) + '\t' + card)
-#     sys.stdout.flush() # These might take a while
-
-
-
-
-
-
-# #
-# # Perform a GET request for the web page.
-# #
-# searchURL = 'https://www.ebay.com/sch/i.html' # Base 'search' URL
-# searchURL += '?&LH_Complete=1&LH_Sold=1'      # Sold auctions only
-# searchURL += '&_nkw='                         # Put search string here
-
-# cardName = 'Jace, the Mind Sculptor Worldwake'
-# cardName = re.sub(r' ', '%20', cardName)
-
-# finalURL = searchURL + cardName
-
-# r = requests.get(finalURL)
-
-# #
-# # Clean the page up.
-# #
-# HTML = removeNonASCII(r.text)
-# HTML = HTML.replace('\t', '').replace('\r', '').replace('\n', '')
-
-# #
-# # TITLES:
-# # Click this link to access This is the Title">This is the Title</a>
-# #
-# # DOLLARS:
-# # class="bold bidsold"><span class="sboffer">$55.00</span></span></li>
-# # class="bold bidsold">$50.00</span></li>
-# #
-# titles = re.findall(r'(?<=Click this link to access )[^>]+(?=\">)', HTML)
-# prices = re.findall(r'(?<=bidsold\">)<?[^<]*(?=<)', HTML)
-
-# # print(str(len(titles)) + " titles:")
-# # for title in titles:
-# #     print(title)
-
-# # print("\n\n")
-
-# # print(str(len(prices)) + " prices:")
-# # for price in prices:
-# #     print(price)
-
-
-
-# #
-# # Don't want to consider offers that were taken. Need a definite price.
-# #
-# removeOffersTaken(titles, prices)
-
-# # print("\n\n\n\n\n")
-
-# # print(str(len(titles)) + " titles:")
-# # for title in titles:
-# #     print(title)
-
-# # print("\n\n")
-
-# # print(str(len(prices)) + " prices:")
-# # for price in prices:
-# #     print(price)
-
-
-
-# #
-# # Turn them into actual numerics.
-# #
-# priceNumbers = pricesToNumbers(prices)
-# for priceN in priceNumbers:
-#     print(priceN)
-
-
+reportExpansion('Expansions/Eternal Masters.txt')

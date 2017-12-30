@@ -14,6 +14,13 @@ web server to run because of cross-domain request issues.
 
 I also needed math support, and Python has some good math libraries.
 
+## Multithreading
+Most of the execution time is spent waiting for eBay to send back the requested
+HTML page. Thus, delegating this waiting time to a pool of threads significantly
+reduces execution time. Benchmarks show that a pool of 8 threads divides run
+times by a factor of anywhere from 3 to 6 (it gets more efficient with more GET
+requests).
+
 ## Libraries Used
 [Requests: HTTP for Humans](http://docs.python-requests.org)
 
