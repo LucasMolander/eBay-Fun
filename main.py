@@ -322,7 +322,7 @@ from html_parsing import removeNonASCII,    \
 
 from util import pricesToNumbers
 
-reportExpansion('Expansions', 'Innistrad.txt')
+reportExpansion('Expansions', 'Rise of the Eldrazi.txt')
 
 
 

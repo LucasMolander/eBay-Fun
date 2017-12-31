@@ -1,0 +1,31 @@
+Worldwake
+36
+0.166666666
+10
+35
+40
+60
+MYTHICS
+Jace, the Mind Sculptor
+Omnath, Locus of Mana
+Eye of Ugin
+Avenger of Zendikar
+Admonition Angel
+Wrexial, the Risen Deep
+Abyssal Persecutor
+Dragonmaster Outcast
+Novablast Wurm
+RARES
+Celestial Colonnade
+Creeping Tar Pit
+Stoneforge Mystic
+Raging Ravine
+Death's Shadow
+Amulet of Vigor
+Kalastria Highborn
+Basilisk Collar
+Joraga Warcaller
+Harabaz Druid
+Anowon, the Ruin Sage
+UNCOMMONS
+COMMONS
