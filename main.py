@@ -131,14 +131,17 @@ def reportExpansion(folder, file):
     pCommon   = 10.0
 
     # Set-specific 'removes' it to be extra careful of
-    if 'Modern Masters 2013' in setName:
-        removes = ['2015', '2017', 'MM15', 'MM17']
-    elif 'Modern Masters 2015' in setName:
-        removes = ['2013', '2017', 'MM13', 'MM17']
-    elif 'Modern Masters 2017' in setName:
-        removes = ['2013', '2015', 'MM13', 'MM15']
-    else:
-        removes = []
+    removes = []
+
+    if setName == 'Modern Masters 2013':
+        removes.extend(['2015', '2017', 'MM15', 'MM17'])
+    elif setName == 'Modern Masters 2015':
+        removes.extend(['2013', '2017', 'MM13', 'MM17'])
+    elif setName == 'Modern Masters 2017':
+        removes.extend(['2013', '2015', 'MM13', 'MM15'])
+
+    if setName == 'Innistrad':
+        removes.extend(['shadows', 'over'])
 
 
 
@@ -152,8 +155,7 @@ def reportExpansion(folder, file):
     for i in range(0, len(allNames)):
         allPrices.append(0.0)
         allPricesFoil.append(0.0)
-    
-    # Now go ahead and get all of the prices in a threaded way
+
     nfThreads = [] # Non-foil threads
     fThreads = []  # Foil threads
 
@@ -320,35 +322,35 @@ from html_parsing import removeNonASCII,    \
 
 from util import pricesToNumbers
 
-# reportExpansion('Expansions', 'Eternal Masters.txt')
+reportExpansion('Expansions', 'Innistrad.txt')
 
 
 
-#
-# Get a report for each of these expansions and write them to a file.
-#
-expansions = [
-    'Amonkhet',
-    'Eternal Masters',
-    'Hour of Devastation',
-    'Iconic Masters',
-    'Ixalan',
-    'Modern Masters 2013',
-    'Modern Masters 2015',
-    'Modern Masters 2017',
-    'Shadows Over Innistrad'
-]
+# #
+# # Get a report for each of these expansions and write them to a file.
+# #
+# expansions = [
+#     'Amonkhet',
+#     'Eternal Masters',
+#     'Hour of Devastation',
+#     'Iconic Masters',
+#     'Ixalan',
+#     'Modern Masters 2013',
+#     'Modern Masters 2015',
+#     'Modern Masters 2017',
+#     'Shadows Over Innistrad'
+# ]
 
-expectedValues = []
+# expectedValues = []
 
-for e in expansions:
-    ev = reportExpansion('Expansions', e + '.txt')
-    expectedValues.append(ev)
+# for e in expansions:
+#     ev = reportExpansion('Expansions', e + '.txt')
+#     expectedValues.append(ev)
 
-outFile = open('Expected Values/12.31.2017 2.txt', 'w')
+# outFile = open('Expected Values/12.31.2017 3.txt', 'w')
 
-for i in range(0, len(expansions)):
-    outFile.write(expansions[i]+':\t'+str(round(expectedValues[i], 2))+'\n')
+# for i in range(0, len(expansions)):
+#     outFile.write(expansions[i]+':\t'+str(round(expectedValues[i], 2))+'\n')
 
-outFile.close()
+# outFile.close()
 

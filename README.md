@@ -7,19 +7,37 @@ The goal is to find the "true" price of a card, find buy-it-now auctions whose
 price is significantly below that price, and send a notification to the user.
 
 ## Why Python
-eBay provides a REST API, so I needed a language with good support for web
-requests. I selected Python because it has a really nice requests library that
-I had used before. I could have went with JavaScript, but that would require a
-web server to run because of cross-domain request issues.
+
+
+
+
+
+
+
+
+
+<<<<<<<<<FIX THIS>>>>>>
+
+
+
+
+
 
 I also needed math support, and Python has some good math libraries.
 
 ## Multithreading
-Most of the execution time is spent waiting for eBay to send back the requested
-HTML page. Thus, delegating this waiting time to a pool of threads significantly
-reduces execution time. Benchmarks show that a pool of 8 threads divides run
-times by a factor of anywhere from 3 to 6 (it gets more efficient with more GET
-requests).
+
+
+
+
+
+
+<<<<<<<<FIX THIS>>>>>>>>
+
+
+
+
+
 
 ## Libraries Used
 [Requests: HTTP for Humans](http://docs.python-requests.org)
