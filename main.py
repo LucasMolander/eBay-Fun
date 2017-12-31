@@ -27,7 +27,7 @@ General notes:
 If it's not a foil, put ' -foil' in the card name.
 If it IS a foil,     put  ' foil'  in the card name.
 """
-def getMedian(card, isFoil, removes, tIndex, out):
+def getMedian(card, setName, isFoil, removes, tIndex, out):
 
     #
     # Perform a GET request for the web page.
@@ -37,6 +37,7 @@ def getMedian(card, isFoil, removes, tIndex, out):
     searchURL += '&_nkw='                         # Put search string here
 
     searchString  = card
+    searchString += ' ' + setName
     searchString += (' foil' if isFoil else ' -foil')
     searchString += ' -4x -x4 -3x -x3 -2x -x2'    # Guards
     searchString = re.sub(r' ', '%20', searchString)
@@ -161,8 +162,8 @@ def reportExpansion(folder, file):
         i += 1
 
         # card, isFoil, removes, tIndex, out
-        nfArgs = (n, False, removes, i, allPrices)
-        fArgs  = (n, True,  removes, i, allPricesFoil)
+        nfArgs = (n, setName, False, removes, i, allPrices)
+        fArgs  = (n, setName, True,  removes, i, allPricesFoil)
 
         nfT = threading.Thread(target=getMedian, args=nfArgs)
         fT  = threading.Thread(target=getMedian, args=fArgs)
@@ -319,7 +320,7 @@ from html_parsing import removeNonASCII,    \
 
 from util import pricesToNumbers
 
-# reportExpansion('Expansions', 'Iconic Masters.txt')
+# reportExpansion('Expansions', 'Eternal Masters.txt')
 
 
 
@@ -344,7 +345,7 @@ for e in expansions:
     ev = reportExpansion('Expansions', e + '.txt')
     expectedValues.append(ev)
 
-outFile = open('Expected Values/12.31.2017.txt', 'w')
+outFile = open('Expected Values/12.31.2017 2.txt', 'w')
 
 for i in range(0, len(expansions)):
     outFile.write(expansions[i]+':\t'+str(round(expectedValues[i], 2))+'\n')
