@@ -43,10 +43,10 @@ def removeContaining(titles, prices, words):
 
     while i >= 0:
         if (i < 0 or i >= len(titles)):
-            # This should never happen, if this isn't here, a thread will
+            # This should never happen, but if this isn't here, a thread will
             # be out of bounds and throw an Exception at the end of the program.
             # This ONLY happens in a threaded version.
-            # Without multithreading, this never happens.
+            # Without multithreading, this never happens. Sigh.
             return
 
         for w in words:

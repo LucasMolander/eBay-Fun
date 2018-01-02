@@ -3,36 +3,52 @@ This file contains short tests for sanity checks.
 """
 
 
-def myFun(index, nums, out):
-	print(str(index) + ': ' + str(sum(nums)))
-
-	# This should be okay because each thread gets a unique index.
-	out[index] = sum(nums)
-	return
 
 
-import threading
 
-# Create the threads
-threads = []
-output = []
-for i in range(0,5):
-	output.append(0)
-	t = threading.Thread(target=myFun, args=(i, [i, i + 1], output))
-	threads.append(t)
-	t.start()
+# myList = ['a', 'b', 'c']
 
-# # Run the threads
-# for t in threads:
+# print(myList)
+# print(myList + ['d'])
+# print(myList)
+
+
+
+
+
+# def myFun(index, nums, out):
+# 	print(str(index) + ': ' + str(sum(nums)))
+
+# 	# This should be okay because each thread gets a unique index.
+# 	out[index] = sum(nums)
+# 	return
+
+
+# import threading
+
+# # Create the threads
+# threads = []
+# output = []
+# for i in range(0,5):
+# 	output.append(0)
+# 	t = threading.Thread(target=myFun, args=(i, [i, i + 1], output))
+# 	threads.append(t)
 # 	t.start()
 
-for t in threads:
-	t.join()
+# # # Run the threads
+# # for t in threads:
+# # 	t.start()
 
-for o in output:
-	print(o)
+# for t in threads:
+# 	t.join()
 
-print('Done!')
+# for o in output:
+# 	print(o)
+
+# print('Done!')
+
+
+
 
 
 # import re
