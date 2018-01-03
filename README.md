@@ -10,11 +10,10 @@ price is significantly below that price, and send a notification to the user.
 Insofar as most of the execution time is spent waiting on eBay to send a
 requested page back, we can easily employ multithreading to significantly
 reduce execution time. We assign a thread to each GET request, which has
-yielded a ____x speed up.
+yielded roughly a 7x speed-up.
 
 ## Package Dependencies
-requests, statistics, and multiprocessing (requires C++ compiler found
-[here](https://www.microsoft.com/en-us/download/confirmation.aspx?id=44266)).
+requests and statistics.
 
 ## License
 MIT License

@@ -156,6 +156,45 @@ def reportMTGBox(folder, file):
 
 
 
+
+    # #
+    # # Single-threaded version of the below.
+    # # This was to find out how much threading helps performance.
+    # #
+
+    # # Thread will put info here
+    # allPrices     = []
+    # allPricesFoil = []
+    # for i in range(0, len(allNames)):
+    #     allPrices.append(0.0)
+    #     allPricesFoil.append(0.0)
+
+    # i = -1
+    # for n in allNames:
+    #     i += 1
+
+    #     # Arguments: item, removes, tIndex, out
+    #     nfItem = n + ' ' + setName + ' -foil'
+    #     fItem  = n + ' ' + setName + ' foil'
+    #     nfremoves = removes + ['foil']
+    #     fRemoves = removes
+    #     nfRequires = requires
+    #     fRequires = requires + ['foil']
+
+    #     nfArgs = (nfItem, guards, nfremoves, nfRequires, i, allPrices)
+    #     fArgs  = (fItem,  guards, fRemoves,  fRequires,  i, allPricesFoil)
+
+    #     theThread = threading.Thread(target=getMedianPriceSold, args=nfArgs)
+    #     theThread.start()
+    #     theThread.join()
+
+    #     theThread = threading.Thread(target=getMedianPriceSold, args=fArgs)
+    #     theThread.start()
+    #     theThread.join()
+
+
+
+
     #
     # Threads.
     #
