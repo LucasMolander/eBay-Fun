@@ -6,41 +6,11 @@ auctions might be pretty valuable." Thus, this project was born.
 The goal is to find the "true" price of a card, find buy-it-now auctions whose
 price is significantly below that price, and send a notification to the user.
 
-## Why Python
-
-
-
-
-
-
-
-
-
-<<<<<<<<<FIX THIS>>>>>>
-
-
-
-
-
-
-I also needed math support, and Python has some good math libraries.
-
 ## Multithreading
-
-
-
-
-
-
-<<<<<<<<FIX THIS>>>>>>>>
-
-
-
-
-
-
-## Libraries Used
-[Requests: HTTP for Humans](http://docs.python-requests.org)
+Insofar as most of the execution time is spent waiting on eBay to send a
+requested page back, we can easily employ multithreading to significantly
+reduce execution time. We assign a thread to each GET request, which has
+yielded a ____x speed up.
 
 ## Package Dependencies
 requests, statistics, and multiprocessing (requires C++ compiler found
