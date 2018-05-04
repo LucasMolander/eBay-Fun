@@ -2,8 +2,7 @@ import re
 import requests
 import statistics
 
-from html_parsing import removeNonASCII,    \
-                         removeOffersTaken, \
+from html_parsing import removeOffersTaken, \
                          removeContaining,  \
                          removeNotContaining
 
@@ -15,17 +14,12 @@ import threading
 from file_parsing import parseExpansionFile
 # from find_prices import getMedianPriceSold
 
-"""
-Gets the median price of the last few 'sold' items on ebay.
-It is a threaded function that takes an output array and index for that array.
 
-@param item the item to search for
-@param guards 
-@param tIndex index of this thread
-@param out 
-"""
-def getMedianPriceSold(item, guards, removes, requires, tIndex, out):
 
+"""
+Gets the 'sold auctions' HTML for a given item (with search gurads)
+"""
+def getHTML(item, guards, tIndex, out):
     #
     # Perform a GET request for the web page.
     #
@@ -43,12 +37,23 @@ def getMedianPriceSold(item, guards, removes, requires, tIndex, out):
 
     r = requests.get(finalURL)
 
+    out[tIndex] = r.text
+
+
+
+"""
+Given the HTML from getHTML,
+gets the median price of the last few 'sold' items on ebay.
+
+@param item the item to search for
+"""
+def getMedianPriceSold(HTML, removes, requires, tIndex, out):
 
 
     #
     # Clean the page up.
     #
-    HTML = removeNonASCII(r.text)
+    HTML = HTML.encode('ascii', 'ignore')
     HTML = HTML.replace('\t', '').replace('\r', '').replace('\n', '')
 
 
@@ -137,7 +142,7 @@ def reportMTGBox(folder, file):
 
     # Guards to subtract in the search string. Less stringent than removes,
     # because if the search is unsuccessful, it'll do a different search.
-    guards = ['4x', 'x4', '3x', 'x3', '2x', 'x2']
+    guards = ['4x', 'x4', '3x', 'x3', '2x', 'x2', 'playset']
 
     # Set-specific 'removes' it to be extra careful of
     if setName == 'Modern Masters 2013':
@@ -156,55 +161,13 @@ def reportMTGBox(folder, file):
 
 
 
-
-    # #
-    # # Single-threaded version of the below.
-    # # This was to find out how much threading helps performance.
-    # #
-
-    # # Thread will put info here
-    # allPrices     = []
-    # allPricesFoil = []
-    # for i in range(0, len(allNames)):
-    #     allPrices.append(0.0)
-    #     allPricesFoil.append(0.0)
-
-    # i = -1
-    # for n in allNames:
-    #     i += 1
-
-    #     # Arguments: item, removes, tIndex, out
-    #     nfItem = n + ' ' + setName + ' -foil'
-    #     fItem  = n + ' ' + setName + ' foil'
-    #     nfremoves = removes + ['foil']
-    #     fRemoves = removes
-    #     nfRequires = requires
-    #     fRequires = requires + ['foil']
-
-    #     nfArgs = (nfItem, guards, nfremoves, nfRequires, i, allPrices)
-    #     fArgs  = (fItem,  guards, fRemoves,  fRequires,  i, allPricesFoil)
-
-    #     theThread = threading.Thread(target=getMedianPriceSold, args=nfArgs)
-    #     theThread.start()
-    #     theThread.join()
-
-    #     theThread = threading.Thread(target=getMedianPriceSold, args=fArgs)
-    #     theThread.start()
-    #     theThread.join()
-
-
-
-
     #
-    # Threads.
+    # First, get the HTML.
     #
 
-    # Threads will put info here
-    allPrices     = []
-    allPricesFoil = []
-    for i in range(0, len(allNames)):
-        allPrices.append(0.0)
-        allPricesFoil.append(0.0)
+    # Threads will put HTML here
+    HTML     = ['' for i in range(0, len(allNames))]
+    HTMLFoil = ['' for i in range(0, len(allNames))]
 
     nfThreads = [] # Non-foil threads
     fThreads  = [] # Foil threads
@@ -216,13 +179,56 @@ def reportMTGBox(folder, file):
         # Arguments: item, removes, tIndex, out
         nfItem = n + ' ' + setName + ' -foil'
         fItem  = n + ' ' + setName + ' foil'
-        nfremoves = removes + ['foil']
+
+        nfArgs = (nfItem, guards, i, HTML)
+        fArgs  = (fItem,  guards, i, HTMLFoil)
+
+        nfT = threading.Thread(target=getHTML, args=nfArgs)
+        fT  = threading.Thread(target=getHTML, args=fArgs)
+
+        nfThreads.append(nfT)
+        fThreads.append(fT)
+
+        nfT.start()
+        fT.start()
+
+    # Wait for all threads to be done.
+    for t in nfThreads:
+        t.join()
+        del t
+
+    for t in fThreads:
+        t.join()
+        del t
+
+
+
+    #
+    # Then, use the HTML to calculate the prices.
+    #
+
+    # Threads will put data here
+    allPrices     = [0.0 for i in range(0, len(allNames))]
+    allPricesFoil = [0.0 for i in range(0, len(allNames))]
+
+    nfThreads = [] # Non-foil threads
+    fThreads  = [] # Foil threads
+
+    i = -1
+    for n in allNames:
+        i += 1
+
+        nfHTML = HTML[i]
+        fHTML  = HTMLFoil[i]
+
+        nfRemoves = removes + ['foil']
         fRemoves = removes
+
         nfRequires = requires
         fRequires = requires + ['foil']
 
-        nfArgs = (nfItem, guards, nfremoves, nfRequires, i, allPrices)
-        fArgs  = (fItem,  guards, fRemoves,  fRequires,  i, allPricesFoil)
+        nfArgs = (nfHTML, nfRemoves, nfRequires, i, allPrices)
+        fArgs  = (fHTML,  fRemoves,  fRequires,  i, allPricesFoil)
 
         nfT = threading.Thread(target=getMedianPriceSold, args=nfArgs)
         fT  = threading.Thread(target=getMedianPriceSold, args=fArgs)

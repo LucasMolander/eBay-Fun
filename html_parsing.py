@@ -2,21 +2,6 @@ import sys
 import re
 import inspect
 
-"""
-Removes all non-ascii (less than 128) characters from a string.
-"""
-def removeNonASCII(str):
-
-    # print('removeNonASCII')
-    # sys.stdout.flush()
-
-    out = []
-
-    for c in str:
-        out.append(c if ord(c) < 128 else '')
-
-    return ''.join(out)
-
 def removeOffersTaken(titles, prices):
 
     # print('removeOffersTaken')

@@ -25,7 +25,7 @@ General notes:
 
 from find_prices import reportMTGBox
 
-reportMTGBox('Expansions', 'Iconic Masters.txt')
+reportMTGBox('Expansions', 'Dominaria.txt')
 
 
 

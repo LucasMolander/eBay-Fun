@@ -1,7 +1,2 @@
 def pricesToNumbers(prices):
-    out = []
-
-    for price in prices:
-        out.append(float(price[1:]))
-
-    return out
+	return [float(p[1:]) for p in prices]
