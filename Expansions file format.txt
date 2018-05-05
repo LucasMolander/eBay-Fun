@@ -2,7 +2,7 @@
 <Packs per booster box>
 <Probability of getting a foil in a booster pack>
 <Number of Mythics>
-<Number of Rares
+<Number of Rares>
 <Number of Uncommons>
 <Number of Commons>
 MYTHICS

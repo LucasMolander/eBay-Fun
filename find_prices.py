@@ -6,7 +6,7 @@ from html_parsing import removeOffersTaken, \
                          removeContaining,  \
                          removeNotContaining
 
-from util import pricesToNumbers
+from util import pricesToNumbers, priceToStr
 
 import sys
 import threading
@@ -162,7 +162,8 @@ def reportMTGBox(folder, file):
 
 
     #
-    # First, get the HTML.
+    # First, get the HTML
+    # (in a threaded way)
     #
 
     # Threads will put HTML here
@@ -204,7 +205,8 @@ def reportMTGBox(folder, file):
 
 
     #
-    # Then, use the HTML to calculate the prices.
+    # Then, use the HTML to calculate the prices
+    # (in a threaded way)
     #
 
     # Threads will put data here
@@ -297,33 +299,46 @@ def reportMTGBox(folder, file):
 
 
     #
-    # Printing the report.
+    # Construct the report.
     #
 
-    # Print them out
-    print('Mythic prices:')
+    out = ''
+
+    title = 'Calculating the price of a ' + setName + ' booster box'
+    out += title + '\n'
+    out += '-' * len(title) + '\n'
+
+    out += '\nMYTHICS\n'
+    if (len(mythicNames) == 0):
+        out += '<none>\n'
     for i in range(0, len(mythicNames)):
-        print(str(round(mythicPrices[i], 2))     + '\t' + 
-              str(round(mythicPricesFoil[i], 2)) + '\t' +
-              mythicNames[i])
+        out += priceToStr(mythicPrices[i])     + '\t' + \
+               priceToStr(mythicPricesFoil[i]) + '\t' + \
+               mythicNames[i] + '\n'
 
-    print('\n\nRare prices:')
+    out += '\nRARES\n'
+    if (len(rareNames) == 0):
+        out += '<none>\n'
     for i in range(0, len(rareNames)):
-        print(str(round(rarePrices[i], 2))     + '\t' + 
-              str(round(rarePricesFoil[i], 2)) + '\t' +
-              rareNames[i])
+        out += priceToStr(rarePrices[i])     + '\t' + \
+               priceToStr(rarePricesFoil[i]) + '\t' + \
+               rareNames[i] + '\n'
 
-    print('\n\nUncommon prices:')
+    out += '\nUNCOMMONS\n'
+    if (len(uncommonNames) == 0):
+        out += '<none>\n'
     for i in range(0, len(uncommonNames)):
-        print(str(round(uncommonPrices[i], 2))     + '\t' + 
-              str(round(uncommonPricesFoil[i], 2)) + '\t' +
-              uncommonNames[i])
+        out += priceToStr(uncommonPrices[i])     + '\t' + \
+               priceToStr(uncommonPricesFoil[i]) + '\t' + \
+               uncommonNames[i] + '\n'
 
-    print('\n\nCommon prices:')
+    out += '\nCOMMONS\n'
+    if (len(commonNames) == 0):
+        out += '<none>\n'
     for i in range(0, len(commonNames)):
-        print(str(round(commonPrices[i], 2))     + '\t' + 
-              str(round(commonPricesFoil[i], 2)) + '\t' +
-              commonNames[i])
+        out += priceToStr(commonPrices[i])     + '\t' + \
+               priceToStr(commonPricesFoil[i]) + '\t' + \
+               commonNames[i] + '\n'
 
     # Averages
     mythicTotal   = sum(mythicPrices)
@@ -337,23 +352,23 @@ def reportMTGBox(folder, file):
     evUncommon = (commonTotal   / float(nUncommons)) if nUncommons > 0 else 0.0
     evCommon   = (uncommonTotal / float(nCommons))   if nCommons   > 0 else 0.0
 
-    print('\n\n')
-    print('Expected Mythic price:   ' + str(round(evMythic, 2)))
-    print('Expected Rare price:     ' + str(round(evRare, 2)))
-    print('Expected Uncommon price: ' + str(round(evUncommon, 2)))
-    print('Expected common price:   ' + str(round(evCommon, 2)))
+    out += '\n'
+    out += 'Expected Mythic price:   ' + priceToStr(evMythic)   + '\n'
+    out += 'Expected Rare price:     ' + priceToStr(evRare)     + '\n'
+    out += 'Expected Uncommon price: ' + priceToStr(evUncommon) + '\n'
+    out += 'Expected common price:   ' + priceToStr(evCommon)   + '\n'
 
     evRandom = allTotal / float(nAll)
     evFoil = evRandom * foilMultiplier
 
-    print('Expected foil price:     ' + str(round(evFoil, 2)))
-    print('\t(Foil multiplier = ' + str(round(foilMultiplier, 2)) + ')')
+    out += '\nExpected foil price:     ' + priceToStr(evFoil) + '\n'
+    out += '\t(Foil multiplier = '       + priceToStr(foilMultiplier) + ')\n'
 
-    print('\nMythics add:   ' + str(round((evMythic   * pMythic),   2)))
-    print(  'Rares add:     ' + str(round((evRare     * pRare),     2)))
-    print(  'Uncommons add: ' + str(round((evUncommon * pUncommon), 2)))
-    print(  'Commons add:   ' + str(round((evCommon   * pCommon),   2)))
-    print(  'Foils add:     ' + str(round((evFoil     * pFoil),     2)))
+    out += '\nMythics add:   ' + priceToStr(evMythic   * pMythic)   + '\n'
+    out +=   'Rares add:     ' + priceToStr(evRare     * pRare)     + '\n'
+    out +=   'Uncommons add: ' + priceToStr(evUncommon * pUncommon) + '\n'
+    out +=   'Commons add:   ' + priceToStr(evCommon   * pCommon)   + '\n'
+    out +=   'Foils add:     ' + priceToStr(evFoil     * pFoil)     + '\n'
 
     evPerPack = (evMythic   * pMythic   +
                  evRare     * pRare     +
@@ -361,9 +376,9 @@ def reportMTGBox(folder, file):
                  evCommon   * pCommon   +
                  evFoil     * pFoil)
 
-    print('\n\nExpected value per pack: ' + str(round(evPerPack, 2)))
+    out += '\nExpected value per pack: ' + priceToStr(evPerPack)
 
     evPerBox = evPerPack * packsPerBox
-    print('\n\nExpected value per box:  ' + str(round(evPerBox, 2)))
+    out += '\nExpected value per box:  ' + priceToStr(evPerBox)
 
-    return evPerBox
+    return evPerBox, out

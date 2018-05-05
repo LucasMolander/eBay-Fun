@@ -7,8 +7,6 @@ def parseExpansionFile(pathToFile):
     packsPerBox = int(rawContents[1])
     pFoil = float(rawContents[2])
 
-    print('\nCalculating the price of a ' + setName + ' booster box\n')
-
     nMythics = int(rawContents[3])
     nRares = int(rawContents[4])
     nUncommons = int(rawContents[5])

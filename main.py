@@ -25,8 +25,9 @@ General notes:
 
 from find_prices import reportMTGBox
 
-reportMTGBox('Expansions', 'Dominaria.txt')
+price, report = reportMTGBox('Expansions', 'Dominaria.txt')
 
+print(report)
 
 
 
@@ -35,6 +36,7 @@ reportMTGBox('Expansions', 'Dominaria.txt')
 # #
 # expansions = [
 #     'Amonkhet',
+#     'Dominaria',
 #     'Eternal Masters',
 #     'Hour of Devastation',
 #     'Iconic Masters',
@@ -49,13 +51,9 @@ reportMTGBox('Expansions', 'Dominaria.txt')
 #     'Zendikar'
 # ]
 
-# expectedValues = []
+# expectedValues = [reportMTGBox('Expansions', e + '.txt') for e in expansions]
 
-# for e in expansions:
-#     ev = reportMTGBox('Expansions', e + '.txt')
-#     expectedValues.append(ev)
-
-# outFile = open('Expected Values/01.01.2018.txt', 'w')
+# outFile = open('Expected Values/05.04.2018.txt', 'w')
 
 # for i in range(0, len(expansions)):
 #     outFile.write(expansions[i]+':\t'+str(round(expectedValues[i], 2))+'\n')
