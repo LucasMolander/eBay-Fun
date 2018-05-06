@@ -8,12 +8,13 @@ price is significantly below that price, and send a notification to the user.
 
 ## Multithreading
 Insofar as most of the execution time is spent waiting on eBay to send a
-requested page back, we can easily employ multithreading to significantly
-reduce execution time. We assign a thread to each GET request, which has
-yielded roughly a 7x speed-up.
+requested page back, we can easily realize a massive speed-up by assigning a thread to each card so that all threads are waiting in parallel.
 
 ## Package Dependencies
-requests and statistics.
+requests and statistics. Potentially sqlite3 (if it's not default).
+
+## Resources
+Special thanks to (MTG JSON)[http://mtgjson.com/] for keeping easily consumable, up-to-date data about all MTG sets and cards.
 
 ## License
 MIT License

@@ -16,6 +16,9 @@ useful_out/
 # Don't want re-constructable files on GitHub.
 Expected Values/
 
+# Obvi
+sqlite/*.db
+
 
 
 #

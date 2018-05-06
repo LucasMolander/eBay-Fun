@@ -1,5 +1,58 @@
 import sqlite3
 
+class SelectWrapper(object):
+
+    selectAllSetsSQL = "SELECT * FROM Sets"
+    selectAllCardSQL = "SELECT * FROM Cards"
+
+    def __init__(self):
+        pass
+
+    def selectAllSets(self):
+        ret = {
+            'success' : True,
+            'message' : 'Successfully selected all sets',
+            'data' : None
+        }
+
+        try:
+            conn = sqlite3.connect('mtg.db')
+
+            c = conn.cursor()
+            c.execute(self.selectAllSetsSQL)
+            ret['data'] = c.fetchall()
+        except Exception as e:
+            ret['success'] = False
+            ret['message'] = 'Failed to select all sets. Error: ' + str(e)
+        finally:
+            conn.commit()
+            conn.close()
+
+        return ret
+
+    def selectAllCards(self):
+        ret = {
+            'success' : True,
+            'message' : 'Successfully selected all cards',
+            'data' : None
+        }
+
+        try:
+            conn = sqlite3.connect('mtg.db')
+
+            c = conn.cursor()
+            c.execute(self.selectAllCardSQL)
+            ret['data'] = c.fetchall()
+        except Exception as e:
+            ret['success'] = False
+            ret['message'] = 'Failed to select all cards. Error: ' + str(e)
+        finally:
+            conn.commit()
+            conn.close()
+
+        return ret
+
+
 class InsertionWrapper(object):
 
     #
@@ -32,7 +85,7 @@ class InsertionWrapper(object):
         missing = []
 
         for ra in requiredAttributes:
-            if (not hasattr(attributes, ra)):
+            if (ra not in attributes):
                 missing.append(ra)
         
         if (len(missing) > 0):
@@ -49,7 +102,7 @@ class InsertionWrapper(object):
             strippedAttrs.append(attributes[requiredAttributes[i]])
 
         try:
-            conn = sqlite3.connect('card_prices.db')
+            conn = sqlite3.connect('mtg.db')
 
             c = conn.cursor()
             c.execute(self.insertSetSQL, strippedAttrs)
@@ -63,7 +116,47 @@ class InsertionWrapper(object):
         return ret
 
     def insertCard(self, attributes):
-        pass
+        ret = {
+            'success' : True,
+            'message' : 'Successfully inserted card'
+        }
+
+        #
+        # Verify that we have the correct arguments.
+        #
+        requiredAttributes = ['cName', 'sName', 'rarity']
+        missing = []
+
+        for ra in requiredAttributes:
+            if (ra not in attributes):
+                missing.append(ra)
+        
+        if (len(missing) > 0):
+            ret['success'] = False
+            ret['message'] = 'Failed to insert card. ' + \
+                'Missing attribute(s) in argument to insertCard(): ' + \
+                ', '.join(missing)
+
+            return ret
+
+        # Strip down attributes
+        strippedAttrs = []
+        for i in range(0, len(requiredAttributes)):
+            strippedAttrs.append(attributes[requiredAttributes[i]])
+
+        try:
+            conn = sqlite3.connect('mtg.db')
+
+            c = conn.cursor()
+            c.execute(self.insertCardSQL, strippedAttrs)
+        except Exception as e:
+            ret['success'] = False
+            ret['message'] = 'Failed to insert card. Error: ' + str(e)
+        finally:
+            conn.commit()
+            conn.close()
+
+        return ret
 
 class TableCRUD(object):
 
@@ -106,7 +199,7 @@ class TableCRUD(object):
         }
 
         try:
-            conn = sqlite3.connect('card_prices.db')
+            conn = sqlite3.connect('mtg.db')
 
             c = conn.cursor()
             c.execute(self.createSetsTableSQL)
@@ -127,7 +220,7 @@ class TableCRUD(object):
         }
 
         try:
-            conn = sqlite3.connect('card_prices.db')
+            conn = sqlite3.connect('mtg.db')
 
             c = conn.cursor()
             c.execute(self.deleteSetsTableSQL)
