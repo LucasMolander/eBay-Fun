@@ -14,7 +14,7 @@ requested page back, we can easily realize a massive speed-up by assigning a thr
 requests and statistics. Potentially sqlite3 (if it's not default).
 
 ## Resources
-Special thanks to (MTG JSON)[http://mtgjson.com/] for keeping easily consumable, up-to-date data about all MTG sets and cards.
+Special thanks to [MTG JSON](http://mtgjson.com/) for keeping easily consumable, up-to-date data about all MTG sets and cards.
 
 ## License
 MIT License
