@@ -247,10 +247,14 @@ class LoadMTGJSON(object):
 
     def getJSONObject(self):
         try:
-            with open(self.filePath) as f:
-                data = json.load(f)
+            with open(self.filePath, 'r') as f:
+                contents = f.read()
+                contents = contents.decode('utf-8')
+                contents = contents.encode('ascii', 'ignore')
+                data = json.loads(contents)
         except Exception as e:
-            print('Could not load file \'{0}\'. Exiting.'.format(self.filePath))
+            print(('Could not load file \'{0}\' due to error: \'{1}\'. ' + \
+                'Exiting.').format(self.filePath, str(e)))
             exit(1)
 
         return data
@@ -258,6 +262,7 @@ class LoadMTGJSON(object):
     def trimSets(self, obj):
         keepTypes = ['core', 'masters', 'un', 'expansion', 'reprint', 'conspiracy']
         deleteReprints = ['Collector\'s Edition', 'International Collector\'s Edition']
+        deleteTimeShift = ['Time Spiral', 'Time Spiral \"Timeshifted\"', 'Planar Chaos', 'Future Sight']
 
         deleteCodes = []
 
@@ -269,8 +274,13 @@ class LoadMTGJSON(object):
                 deleteCodes.append(setCode)
                 continue
 
-            # Further, only keep certain types of reprints
+            # Further, only keep certain types of reprints (e.g. Modern Masters)
             if (setObj['type'] == 'reprint' and setObj['name'] in deleteReprints):
+                deleteCodes.append(setCode)
+                continue
+
+            # Also, delete timeshifted wonkiness
+            if (setObj['type'] == 'expansion' and setObj['name'] in deleteTimeShift):
                 deleteCodes.append(setCode)
                 continue
 
@@ -278,10 +288,15 @@ class LoadMTGJSON(object):
             del obj[dc]
 
     def getSetAttribs(self, mtgSet):
+        name = mtgSet['name']
+        theType = mtgSet['type']
         rares  = mtgSet['booster'][0]
         others = mtgSet['booster'][1:]
 
-        print(rares)
+        # print('{0} ({1}):\t{2}'.format(name, theType, rares))
+        # print('{0}\t\t{1}'.format(rares, name))
+        if (type(rares) is list and rares[1] == 'uncommon'):
+            print('{0}\t\t{1}'.format(rares, name))
 
     def loadIntoDB(self):
         obj = self.getJSONObject()
