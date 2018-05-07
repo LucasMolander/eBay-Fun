@@ -13,8 +13,8 @@ requested page back, we can easily realize a massive speed-up by assigning a thr
 ## Package Dependencies
 requests and statistics. Potentially sqlite3 (if it's not default).
 
-## Resources
-Special thanks to (MTG JSON)[http://mtgjson.com/] for keeping easily consumable, up-to-date data about all MTG sets and cards.
+## MTG JSON
+Special thanks to [MTG JSON](http://mtgjson.com/) for keeping easily consumable, up-to-date data about all MTG sets and cards. The types of sets included are: `'box', 'core', 'masters', 'premium deck', 'promo', 'board game deck', 'duel deck', 'un', 'expansion', 'from the vault', 'vanguard', 'masterpiece', 'commander', 'archenemy', 'planechase', 'reprint', 'conspiracy', and 'starter'`. I stripped it down to only consider `'core', 'masters', 'un', 'expansion', 'reprint', and 'conspiracy'`. Note that `masterpiece` cards were excluded. Thus, for example, adding the value from Invocations to the expected value of Amonkhet will have to be done manually. Moreover, I excluded `Collector's Edition` and `International Collector's Edition` from the `reprint` type.
 
 ## License
 MIT License

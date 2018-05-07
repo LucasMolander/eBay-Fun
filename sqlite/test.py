@@ -1,4 +1,7 @@
-from database import TableCRUD, InsertionWrapper, SelectWrapper
+from database import TableCRUD, InsertionWrapper, SelectWrapper, LoadMTGJSON
+
+load = LoadMTGJSON()
+load.loadIntoDB()
 
 def testInsertionAndDeletion():
     tc = TableCRUD()
@@ -65,4 +68,4 @@ def testInsertionAndDeletion():
     else:
         print(r2['message'])
 
-testInsertionAndDeletion()
+# testInsertionAndDeletion()

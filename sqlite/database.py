@@ -1,7 +1,11 @@
 import sqlite3
+import json
 
 class SelectWrapper(object):
 
+    #
+    # SELECT statements.
+    #
     selectAllSetsSQL = "SELECT * FROM Sets"
     selectAllCardSQL = "SELECT * FROM Cards"
 
@@ -56,7 +60,7 @@ class SelectWrapper(object):
 class InsertionWrapper(object):
 
     #
-    # INSERT INTO statements
+    # INSERT INTO statements.
     #
     insertSetSQL = \
         "INSERT INTO Sets "                                                   + \
@@ -233,3 +237,89 @@ class TableCRUD(object):
             conn.close()
 
         return ret
+
+class LoadMTGJSON(object):
+
+    filePath = 'AllSets.json'
+
+    def __init__(self):
+        pass
+
+    def getJSONObject(self):
+        try:
+            with open(self.filePath) as f:
+                data = json.load(f)
+        except Exception as e:
+            print('Could not load file \'{0}\'. Exiting.'.format(self.filePath))
+            exit(1)
+
+        return data
+
+    def trimSets(self, obj):
+        keepTypes = ['core', 'masters', 'un', 'expansion', 'reprint', 'conspiracy']
+        deleteReprints = ['Collector\'s Edition', 'International Collector\'s Edition']
+
+        deleteCodes = []
+
+        for setCode in obj:
+            setObj = obj[setCode]
+
+            # Remove sets that aren't ones we want to keep
+            if (setObj['type'] not in keepTypes):
+                deleteCodes.append(setCode)
+                continue
+
+            # Further, only keep certain types of reprints
+            if (setObj['type'] == 'reprint' and setObj['name'] in deleteReprints):
+                deleteCodes.append(setCode)
+                continue
+
+        for dc in deleteCodes:
+            del obj[dc]
+
+    def getSetAttribs(self, mtgSet):
+        rares  = mtgSet['booster'][0]
+        others = mtgSet['booster'][1:]
+
+        print(rares)
+
+    def loadIntoDB(self):
+        obj = self.getJSONObject()
+        
+        # types = {}
+
+        # for setCode in obj:
+        #     setObj = obj[setCode]
+
+        #     setType = setObj['type']
+        #     if (setType not in types):
+        #         types[setType] = 0
+        #     types[setType] += 1
+
+        # for t in types:
+        #     print('{0}: {1}'.format(t, types[t]))
+
+        # print('\n----------\n')
+
+        self.trimSets(obj)
+
+        # types = {}
+
+        # for setCode in obj:
+        #     setObj = obj[setCode]
+
+        #     setType = setObj['type']
+        #     if (setType not in types):
+        #         types[setType] = 0
+        #     types[setType] += 1
+
+        # for t in types:
+        #     print('{0}: {1}'.format(t, types[t]))
+
+        for setCode in obj:
+            setObj = obj[setCode]
+
+            attribs = self.getSetAttribs(setObj)
+            # print(attribs)
+
+
