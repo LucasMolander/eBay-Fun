@@ -287,16 +287,59 @@ class LoadMTGJSON(object):
         for dc in deleteCodes:
             del obj[dc]
 
+    #
+    # Old packs are pretty screwey with how they handle rarity.
+    # Make a <setName, <cardName, rarity>> map manually.
+    #
+    # SPECIAL - CHRONICLES
+    # Chronicles:     Rare: U1.     Uncommon: U3, C1
+    #
+    # Arabian Nights: Rare: U2.     Uncommon: U3, U4
+    # Fallen Empires: Rare: U1.     Uncommon: U2, U3
+    # Antiquities:    Rare: U1.     Uncommon: U2, U3 (WEIRD)
+    # Homelands:      Rare: U1.     Uncommon: U3, C1
+    # The Dark:       Rare: U1, U2. Uncommon: <DNE>
+    #
+    # Just say that The Dark is two rares, and they're U1, U2.
+    # Make any 'uncommon' just be 'C1'
+    #
+    # ALSO, FINAL NOTE:
+    # Watch some pack opening videos to make sure that this is consistent.
+    #
+    # Good website: https://magiccards.info/ch/en.html
+    #
     def getSetAttribs(self, mtgSet):
-        name = mtgSet['name']
+        setName = mtgSet['name']
         theType = mtgSet['type']
         rares  = mtgSet['booster'][0]
         others = mtgSet['booster'][1:]
 
-        # print('{0} ({1}):\t{2}'.format(name, theType, rares))
-        # print('{0}\t\t{1}'.format(rares, name))
-        if (type(rares) is list and rares[1] == 'uncommon'):
-            print('{0}\t\t{1}'.format(rares, name))
+        nameCardsMap = {}
+        cards = mtgSet['cards']        
+        for c in cards:
+            # Ignore basic lands
+            if (c['rarity'] == 'Basic Land'):
+                continue
+
+            cardName = c['name']
+
+            if (cardName not in nameCardsMap):
+                nameCardsMap[cardName] = []
+
+            nameCardsMap[cardName].append(c)
+
+        for n in nameCardsMap:
+            cards = nameCardsMap[n]
+            if (len(cards) > 1):
+                rarities = [c['rarity'] for c in cards]
+                print('{0} - {1}: {2}. {3}'.format(setName, n, len(cards), rarities))
+
+        
+        # weirdos = ['Arabian Nights', 'Fallen Empires', 'Antiquities', 'Homelands', 'The Dark']
+
+        # # print(name)
+        # if (name in weirdos):
+        #     print('{0}: {1}'.format(name, mtgSet['booster']))
 
     def loadIntoDB(self):
         obj = self.getJSONObject()
