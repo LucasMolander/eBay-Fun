@@ -1,0 +1,112 @@
+Antiquities:
+C1: 6
+U2: 4
+U1: 24
+U3: 29
+C4: 25
+
+    Uncommon
+    Uncommon
+    Common
+    Common
+    Common
+    Common
+    Common
+    Common
+
+
+
+Arabian Nights:
+U4: 1
+U3: 17
+U2: 33
+C2: 14
+C11: 1
+C1: 1
+C5: 4
+C4: 7
+
+    Uncommon
+    Uncommon
+    Common
+    Common
+    Common
+    Common
+    Common
+    Common
+
+
+
+Fallen Empires:
+C1: 37
+U1: 36
+U3: 24
+U2: 5
+
+    Uncommon
+    Uncommon
+    Common
+    Common
+    Common
+    Common
+    Common
+    Common
+
+
+
+Homelands:
+C2: 25
+C1: 21
+U1: 43
+U3: 26
+
+    Uncommon
+    Uncommon
+    Common
+    Common
+    Common
+    Common
+    Common
+    Common
+
+
+
+Legends:
+C2: 46
+C1: 29
+U1: 105
+R1: 121
+U2: 9
+
+    "rare",
+    "uncommon",
+    "uncommon",
+    "uncommon",
+    "common",
+    "common",
+    "common",
+    "common",
+    "common",
+    "common",
+    "common",
+    "common",
+    "common",
+    "common",
+    "common"
+
+
+
+The Dark:
+C3: 40
+C1: 1
+U1: 35
+U2: 43
+
+    Uncommon
+    Uncommon
+    Common
+    Common
+    Common
+    Common
+    Common
+    Common
