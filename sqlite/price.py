@@ -167,7 +167,6 @@ class PriceScanner(object):
             prices = [0.0 for i in range(0, len(cards))]
             threads = PriceScanner.getParseThreads(False, cards, removes, requires, HTML, prices)
             PriceScanner.runThreads(threads)
-
         else:
             print('\'Not old set\' path in getPrices() isn\'t implemented yet!')
             return []

@@ -349,6 +349,19 @@ class TableCRUD(object):
             "FOREIGN KEY (sName) REFERENCES NewSets (name) " + \
         ")"
 
+    # Don't worry about foreign keys here.
+    # Nothing uses the Prices table to point to anything else;
+    # the prices are an end in themselves.
+    # We can just use CHECKs.
+    createPricesTableSQL = \
+        "CREATE TABLE Prices ( "          + \
+            "cName TEXT, "                + \
+            "sName TEXT, "                + \
+            "cName TEXT, "                + \
+            "cName TEXT, "                + \
+            "cName TEXT, "                + \
+        ")"
+
     #
     # DROP TABLE statements.
     #
@@ -356,6 +369,7 @@ class TableCRUD(object):
     deleteNewSetsTableSQL  = "DROP TABLE NewSets"
     deleteOldCardsTableSQL = "DROP TABLE OldCards"
     deleteNewCardsTableSQL = "DROP TABLE NewCards"
+    deletePricesTableSQL   = "DROP TABLE Prices"
 
     def __init__(self):
         pass
@@ -374,6 +388,7 @@ class TableCRUD(object):
             c.execute(self.createNewSetsTableSQL)
             c.execute(self.createOldCardsTableSQL)
             c.execute(self.createNewCardsTableSQL)
+            c.execute(self.createPricesTableSQL)
         except Exception as e:
             ret['success'] = False
             ret['message'] = 'Failed to create tables. Error: ' + str(e)
@@ -397,6 +412,7 @@ class TableCRUD(object):
             c.execute(self.deleteNewCardsTableSQL)
             c.execute(self.deleteOldSetsTableSQL)
             c.execute(self.deleteNewSetsTableSQL)
+            c.execute(self.deletePricesTableSQL)
         except Exception as e:
             ret['success'] = False
             ret['message'] = 'Failed to drop tables. Error: ' + str(e)
