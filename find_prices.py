@@ -72,18 +72,6 @@ def getMedianPriceSold(HTML, removes, requires, tIndex, out):
     # Don't want to consider offers that were taken. Need a definite price.
     removeOffersTaken(titles, prices)
 
-
-
-
-    # # If searching for a foil, remove cards that don't have 'foil' in the title.
-    # # If searching for a non-foil, remove titles that do have 'foil'.
-    # if isFoil:
-    #     removeNotContaining(titles, prices, ['foil'])
-    # else:
-    #     removeContaining(titles, prices, ['foil'])
-
-
-
     # Extra, more specific strings to be careful of in the title.
     # For example, we want to avoid '2017' for Modern Masters 2013.
     removeContaining(titles, prices, removes)
@@ -100,7 +88,7 @@ def getMedianPriceSold(HTML, removes, requires, tIndex, out):
     #
     # Try just taking the median of the most recently-finished auctions.
     #
-    medianCutoff = 10
+    medianCutoff = 20
     if (len(priceNumbers) > medianCutoff):
         priceNumbers = priceNumbers[0:medianCutoff]
 

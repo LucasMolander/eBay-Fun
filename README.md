@@ -21,7 +21,7 @@ Special thanks to [MTG JSON](http://mtgjson.com/) for keeping easily consumable,
 * I excluded Time Spiral sets (`Time Spiral`, `Planar Chaos`, and `Future Sight`).
 
 ## Old Set Considerations
-For `Antiquities`, `Arabian Nights`, `Fallen Empires`, `Homelands`, `Legends`, and `The Dark`, I (with the help of [MTG card search](https://magiccards.info/)) manually transcribed and dynamically parse the rarities of old sets. When there were conflicts (for example: ), I averaged and rounded down to err on the side of safety (I would prefer the program underestimate a set rather than overestimate a set).
+For `Antiquities`, `Arabian Nights`, `Fallen Empires`, `Homelands`, `Legends`, and `The Dark`, I (with the help of [MTG card search](https://magiccards.info/)) manually transcribed and dynamically parse the rarities of old sets. For alternate art cards, I averaged and rounded down the rarities to err on the side of safety (I would prefer the program underestimate a set rather than overestimate a set). That is, except for `Mishra's Factory`, where I treated it as four separate cards.
 
 ## License
 MIT License

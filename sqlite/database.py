@@ -30,7 +30,12 @@ class DBUtil(object):
 class SelectWrapper(object):
 
     #
-    # SELECT statements.
+    # SELECT cards in a set.
+    #
+    selectOldCardsForSetSQL = "SELECT * FROM OldCards WHERE sName = ?"
+
+    #
+    # Generic SELECT statements.
     #
     selectAllOldSetsSQL  = "SELECT * FROM OldSets"
     selectAllNewSetsSQL  = "SELECT * FROM NewSets"
@@ -39,6 +44,30 @@ class SelectWrapper(object):
 
     def __init__(self):
         pass
+
+    def selectOldCardsForSet(self, setName):
+        ret = {
+            'success' : True,
+            'message' : 'Successfully selected old cards',
+            'data' : None
+        }
+
+        attribs = [setName]
+
+        try:
+            conn = sqlite3.connect('mtg.db')
+
+            c = conn.cursor()
+            c.execute(self.selectOldCardsForSetSQL, attribs)
+            ret['data'] = [list(t) for t in c.fetchall()]
+        except Exception as e:
+            ret['success'] = False
+            ret['message'] = 'Failed to select old cards. Error: ' + str(e)
+        finally:
+            conn.commit()
+            conn.close()
+
+        return ret
 
     def selectAllOldSets(self):
         ret = {

@@ -1,5 +1,7 @@
 from database import TableCRUD, InsertionWrapper, SelectWrapper, LoadMTGJSON, InitialPopulator
 
+from price import PriceScanner
+
 # load = LoadMTGJSON()
 # load.loadIntoDB()
 
@@ -144,5 +146,25 @@ def testInsertingOldThings():
         print(r['message'])
 
 
+def testSelectingCardsForSets():
+    sw = SelectWrapper()
+    ret = sw.selectOldCardsForSet('Antiquities')
+    print(ret['message'])
+    data = ret['data']
+    print(data)
+    for d in data:
+        print(d)
+
+def testStoringPrices():
+    ps = PriceScanner()
+    ps.storePricesForSet('Antiquities', True)
+
 # testBasicSchema()
-testInsertingOldThings()
+# testInsertingOldThings()
+
+# testSelectingCardsForSets()
+
+
+
+testStoringPrices()
+
