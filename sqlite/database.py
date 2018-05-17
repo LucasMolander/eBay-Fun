@@ -357,7 +357,7 @@ class TableCRUD(object):
         "CREATE TABLE Prices ( "          + \
             "cName TEXT, "                + \
             "sName TEXT, "                + \
-            "cName TEXT, "                + \
+            "days  TEXT, "                + \
             "cName TEXT, "                + \
             "cName TEXT, "                + \
         ")"

@@ -29,6 +29,8 @@ class PriceScanner(object):
 
         finalURL = searchURL + searchString
 
+        print(finalURL)
+
         print('Sending request...')
         sys.stdout.flush()
         r = requests.get(finalURL)
@@ -45,6 +47,14 @@ class PriceScanner(object):
         HTML = HTML.encode('ascii', 'ignore')
         HTML = HTML.replace('\t', '').replace('\r', '').replace('\n', '')
 
+        # Remove some stuff that's been messing with the titles
+        HTML = HTML.replace("<span class=\"LIGHT_HIGHLIGHT\">New Listing</span>", '')
+
+        # print(HTML)
+
+
+
+
         #
         # TITLES:
         # Click this link to access This is the Title">This is the Title</a>
@@ -53,8 +63,35 @@ class PriceScanner(object):
         # class="bold bidsold"><span class="sboffer">$55.00</span></span></li>
         # class="bold bidsold">$50.00</span></li>
         #
-        titles = re.findall(r'(?<=Click this link to access )[^>]+(?=\">)', HTML)
-        prices = re.findall(r'(?<=bidsold\">)<?[^<]*(?=<)', HTML)
+
+        # OLD
+        # titles = re.findall(r'(?<=Click this link to access )[^>]+(?=\">)', HTML)
+        # prices = re.findall(r'(?<=bidsold\">)<?[^<]*(?=<)', HTML)
+        titles = re.findall(r'(?<=<\/div><\/div>)<?[^<]*(?=<\/h3>)', HTML)
+        prices = re.findall(r'(?<=<span class=")[A-Za-z0-9-_ ]*POSITIVE">\$\d+\.\d+(?=<\/span>)', HTML)
+
+        
+
+
+
+        # print('\n\nTITLES\n\n')
+
+        # for t in titles:
+        #     print(t)
+
+        # print('\n\nPRICES\n\n')
+
+        # for p in prices:
+        #     print(p)
+
+        if (len(titles) != len(prices)):
+            print('THREAD INDEX {0}:\n{1} titles; {2} prices\n'.format(tIndex, len(titles), len(prices)))
+            out[tIndex] = -1.0
+            return
+
+        # exit(1)
+
+
 
         # Don't want to consider offers that were taken. Need a definite price.
         HTMLParseUtil.removeOffersTaken(titles, prices)
@@ -68,7 +105,7 @@ class PriceScanner(object):
         HTMLParseUtil.removeNotContaining(titles, prices, requires)
 
         # Turn strings into actual numebers.
-        priceNumbers = [float(p[1:]) for p in prices]
+        priceNumbers = [float(p[p.find('$')+1 : ]) for p in prices]
 
         #
         # Try just taking the median of the most recently-finished auctions.
@@ -108,7 +145,7 @@ class PriceScanner(object):
 
             # Arguments: item, guards, tIndex, out
             foilStr = 'foil' if areFoil else '-foil'
-            item = card[0] + ' ' + setName + ' ' + foilStr
+            item = card[0] + ' ' + setName + ' mtg ' + foilStr
 
             args = (item, guards, i, HTMLOut)
             t = threading.Thread(target=PriceScanner.getHTML, args=args)
@@ -146,9 +183,6 @@ class PriceScanner(object):
             del t
 
     def getPrices(self, setName, isOldSet, cards):
-        print('getPrices()')
-        sys.stdout.flush()
-
         # Guards to subtract in the search string. Less stringent than removes,
         # because if the search is unsuccessful, it'll do a different search.
         guards = PriceScanner.getGuards()
@@ -167,6 +201,15 @@ class PriceScanner(object):
             prices = [0.0 for i in range(0, len(cards))]
             threads = PriceScanner.getParseThreads(False, cards, removes, requires, HTML, prices)
             PriceScanner.runThreads(threads)
+
+            for i in range(0, len(cards)):
+                cards[i].append(round(prices[i], 2))
+
+            cards = sorted(cards, key=lambda card: card[3])
+
+            for i in range(0, len(cards)):
+                print(cards[i])
+
         else:
             print('\'Not old set\' path in getPrices() isn\'t implemented yet!')
             return []
@@ -177,6 +220,12 @@ class PriceScanner(object):
             'message': 'Successfully set the prices for ' + setName
         }
 
+        # # TEST
+        # cards = [['Urza\'s mine', 'Antiquities', 'C1']]
+        # self.getPrices(setName, isOldSet, cards)
+        # print(cards[0][3])
+
+        # Actual shit
         sw = SelectWrapper()
         if (isOldSet):
             status = sw.selectOldCardsForSet(setName)

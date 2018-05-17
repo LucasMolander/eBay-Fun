@@ -157,7 +157,9 @@ def testSelectingCardsForSets():
 
 def testStoringPrices():
     ps = PriceScanner()
-    ps.storePricesForSet('Antiquities', True)
+    # status = ps.storePricesForSet('Antiquities', True)
+    status = ps.storePricesForSet('Arabian Nights', True)
+    # print(status)
 
 # testBasicSchema()
 # testInsertingOldThings()
