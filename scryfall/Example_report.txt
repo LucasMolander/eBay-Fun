@@ -1,0 +1,172 @@
+
+Boxes and their expected values:
+(EXCLUSIVE PRICE $2)
+
+Aether Revolt
+-------------
+allAvg	80.6574374427
+exAvg	48.61011416
+allMed	28.935
+
+
+Amonkhet
+--------
+allAvg	74.2531869558
+exAvg	28.8204545455
+allMed	44.235
+
+
+Avacyn Restored
+---------------
+allAvg	155.878358491
+exAvg	106.715377358
+allMed	59.04
+
+
+Battle for Zendikar
+-------------------
+allAvg	51.1488679245
+exAvg	13.4485471698
+allMed	25.65
+
+
+Coldsnap
+--------
+allAvg	307.100284091
+exAvg	189.614147727
+allMed	66.96
+
+
+Dark Ascension
+--------------
+allAvg	113.896561005
+exAvg	43.5130263158
+allMed	52.695
+
+
+Eternal Masters
+---------------
+allAvg	248.206899869
+exAvg	190.847698113
+allMed	92.37
+
+
+Gatecrash
+---------
+allAvg	117.357142911
+exAvg	62.206245283
+allMed	49.545
+
+
+Hour of Devastation
+-------------------
+allAvg	75.3018188911
+exAvg	31.0796590909
+allMed	42.5925
+
+
+Iconic Masters
+--------------
+allAvg	173.922680553
+exAvg	136.895471698
+allMed	64.89
+
+
+Innistrad
+---------
+allAvg	177.241903493
+exAvg	115.068622881
+allMed	62.37
+
+
+Ixalan
+------
+allAvg	102.951429633
+exAvg	58.7064815142
+allMed	39.87
+
+
+Kaladesh
+--------
+allAvg	54.0470425199
+exAvg	25.9496951872
+allMed	24.12
+
+
+Khans of Tarkir
+---------------
+allAvg	97.9189245283
+exAvg	57.1311509434
+allMed	29.52
+
+
+Masters 25
+----------
+allAvg	164.366723146
+exAvg	115.898716981
+allMed	53.43
+
+
+Modern Masters
+--------------
+allAvg	423.261621147
+exAvg	351.103605081
+allMed	174.69
+
+
+Modern Masters 2015
+-------------------
+allAvg	266.751974967
+exAvg	221.193490566
+allMed	114.87
+
+
+Modern Masters 2017
+-------------------
+allAvg	278.470976835
+exAvg	238.536433962
+allMed	65.22
+
+
+New Phyrexia
+------------
+allAvg	297.341307692
+exAvg	191.268
+allMed	132.075
+
+
+Return to Ravnica
+-----------------
+allAvg	119.943367925
+exAvg	70.5700188679
+allMed	42.12
+
+
+Scars of Mirrodin
+-----------------
+allAvg	229.479396226
+exAvg	161.709113208
+allMed	115.56
+
+
+Shadows over Innistrad
+----------------------
+allAvg	63.3643439137
+exAvg	23.3783898305
+allMed	31.7475
+
+
+Worldwake
+---------
+allAvg	299.8635
+exAvg	204.021
+allMed	84.3975
+
+
+Zendikar
+--------
+allAvg	342.735339623
+exAvg	265.412264151
+allMed	79.47
+
+

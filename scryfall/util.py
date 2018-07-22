@@ -9,26 +9,31 @@ from pprint import pprint
 #
 # Call this one more often.
 #
-def reportExpectedValues(minPrice=0):
+def reportExpectedValues(exclPrice=0):
     setNameToSetCards = _loadFromFiles()
 
-    setNameToBoxEV = {}
+    setNameToBoxEVs = {}
 
     setNamesSorted = sorted(list(setNameToSetCards.keys()))
 
     for setName in setNamesSorted:
         cards = setNameToSetCards[setName]
-
-        setReportTitle = '%s (%d cards total)' % (setName, len(cards))
-        dashes = '-' * len(setReportTitle)
-        print('\n%s\n%s' % (setReportTitle, dashes))
-
-        evPerBox = getBoxEV(setName, cards, minPrice=minPrice)
-
-        setNameToBoxEV[setName] = evPerBox
+        setStats = getSetStats(setName, cards, exclPrice=exclPrice)
+        setNameToBoxEVs[setName] = setStats
 
     print('\nBoxes and their expected values:')
-    pprint(setNameToBoxEV)
+    if (exclPrice > 0):
+        print('(EXCLUSIVE PRICE $%s)' % exclPrice)
+    print('')
+    # pprint(setNameToBoxEVs)
+    for setName in setNamesSorted:
+        evs = setNameToBoxEVs[setName]
+
+        print(setName)
+        print('-' * len(setName))
+        for ev in evs:
+            print('%s\t%s' % (ev, evs[ev]))
+        print('\n')
 
 
 def _loadFromFiles():
@@ -92,7 +97,7 @@ def _getCardsForSet(code):
     return cards
 
 
-def getCardsStats(cards, minPrice=0):
+def getCardsStats(cards, exclPrice=0):
     ret = {
         'mythic': {
             'all': {
@@ -169,9 +174,11 @@ def getCardsStats(cards, minPrice=0):
         bucket['all']['n']           += 1
         bucket['all']['prices'][name] = price
 
-        if (price >= minPrice):
-            bucket['exclusive']['n']           += 1
+        if (price >= exclPrice):
+            bucket['exclusive']['n'] += 1 
             bucket['exclusive']['prices'][name] = price
+        else:
+            bucket['exclusive']['prices'][name] = 0
 
     for rarity in ret:
         bucket = ret[rarity]
@@ -181,84 +188,89 @@ def getCardsStats(cards, minPrice=0):
 
             priceValues = list(innerBucket['prices'].values())
             if (len(priceValues) > 0):
-                innerBucket['priceSum'] = sum(priceValues)
-                innerBucket['priceAvg'] = statistics.mean(priceValues)
-                innerBucket['priceMed'] = statistics.median(priceValues)
+
+                p = rarityToProbability[rarity]
+
+                innerBucket['sum']       = sum(priceValues)
+                innerBucket['avg']       = statistics.mean(priceValues)
+                innerBucket['med']       = statistics.median(priceValues)
+                innerBucket['avgValAdd'] = innerBucket['avg'] * p
+                innerBucket['medValAdd'] = innerBucket['med'] * p
             else:
-                innerBucket['priceSum'] = 0.0
-                innerBucket['priceAvg'] = 0.0
-                innerBucket['priceMed'] = 0.0
+                innerBucket['sum']       = 0.0
+                innerBucket['avg']       = 0.0
+                innerBucket['med']       = 0.0
+                innerBucket['avgValAdd'] = 0.0
+                innerBucket['medValAdd'] = 0.0
 
     return ret
 
-def getValueAdds(averages):
+
+def getSetStats(setName, cards, exclPrice=0):
     ret = {}
 
-    # This information is true regardless of the pack (Shards of Alara on).
-    pMythic   = 1.0 / 8.0
-    pRare     = 7.0 / 8.0
-    pUncommon = 3.0
-    pCommon   = 10.0
+    stats = getCardsStats(cards, exclPrice=exclPrice)
 
-    ret['mythicsAdd']   = averages['avgMythicPrice']   * pMythic
-    ret['raresAdd']     = averages['avgRarePrice']     * pRare
-    ret['uncommonsAdd'] = averages['avgUncommonPrice'] * pUncommon
-    ret['commonsAdd']   = averages['avgCommonPrice']   * pCommon
+    # title = setName + ((' (exclPrice=%s)' % exclPrice) if exclPrice > 0 else '')
+    # print('\n%s\n%s' % (title, '-' * len(title)))
+
+    # for rarity in stats:
+    #     print(rarity)
+    #     bucket = stats[rarity]
+    #     for innerBucket in bucket:
+
+    #         if (exclPrice == 0 and innerBucket == 'exclusive'):
+    #             continue
+
+    #         print('\t%s' % innerBucket)
+
+    #         innerStats = copy.deepcopy(bucket[innerBucket])
+    #         del innerStats['prices']
+
+    #         for s in innerStats:
+    #             print('\t\t%s: %s' % (s, innerStats[s]))
+            
+    #     print('')
+
+    nPacks = nameToNPacks[setName]
+
+    #
+    # Calculate overall expected values
+    #
+    if (exclPrice > 0):
+        # Average of cards that meet minimum price
+        totalVA = 0.0
+        for rarity in stats:
+            bucket = stats[rarity]
+            totalVA += bucket['exclusive']['avgValAdd']
+
+        ret['exAvg'] = totalVA * nPacks
+        # print('Exclusive EV by avg: %s' % totalVA)
+        # print('\t(%s per box)\n' % (totalVA * nPacks))
+    else:
+        ret['exAvg'] = None
+
+    # Average of all cards
+    totalVA = 0.0
+    for rarity in stats:
+        bucket = stats[rarity]
+        totalVA += bucket['all']['avgValAdd']
+
+    ret['allAvg'] = totalVA * nPacks
+    # print('All EV by avg: %s' % totalVA)
+    # print('\t(%s per box)\n' % (totalVA * nPacks))
+
+    # Median of all cards
+    totalVA = 0.0
+    for rarity in stats:
+        bucket = stats[rarity]
+        totalVA += bucket['all']['medValAdd']
+
+    ret['allMed'] = totalVA * nPacks
+    # print('All EV by med: %s' % totalVA)
+    # print('\t(%s per box)\n' % (totalVA * nPacks))
 
     return ret
-
-def getBoxEV(setName, cards, minPrice=0):
-    stats     = getCardsStats(cards, minPrice=minPrice)
-    valueAdds = getValueAdds(stats)
-    
-    print('Averages:')
-    pprint(averages)
-
-    print('\nValue adds:')
-    pprint(valueAdds)
-
-    packsPerBox = nameToNPacks[setName]
-    evPerPack = sum(list(valueAdds.values()))
-    evPerBox = evPerPack * packsPerBox
-    print('\nEV per pack: %.2f' % evPerPack)
-    print('EV per box: %.2f\n\n' % evPerBox)
-
-    return evPerBox
-
-def reportSet(setName, minPrice=0):
-    setNameToSetCards = _loadFromFiles()
-    cards = setNameToSetCards['Eternal Masters']
-    stats = getCardsStats(cards, minPrice=minPrice)
-
-    title = setName + ((' (minPrice=%s)' % minPrice) if minPrice > 0 else '')
-    print('\n%s\n%s' % (title, '-' * len(title)))
-
-    for rarity in ['mythic', 'rare', 'uncommon', 'common']:
-        print(rarity)
-        bucket = stats[rarity]
-        for innerBucket in bucket:
-
-            if (minPrice == 0 and innerBucket == 'exclusive'):
-                continue
-
-            print('\t%s' % innerBucket)
-
-            innerStats = copy.deepcopy(bucket[innerBucket])
-            del innerStats['prices']
-
-            for s in innerStats:
-                print('\t\t%s: %s' % (s, innerStats[s]))
-            
-        print('')
-            
-
-    # pprint(stats)
-    exit()
-
-    print('Mythic total: %s (average = %s)' % (stats['mythicTotal'], averages['avgMythicPrice']))
-    print('Rare total: %s (average = %s)' % (stats['mythicTotal'], averages['avgMythicPrice']))
-    print('Mythic total: %s (average = %s)' % (stats['mythicTotal'], averages['avgMythicPrice']))
-    print('Mythic total: %s (average = %s)' % (stats['mythicTotal'], averages['avgMythicPrice']))
 
 
 nameToCode = {
@@ -315,6 +327,13 @@ nameToNPacks = {
     'Ixalan':                 36
 }
 
+rarityToProbability = {
+    'mythic':   1.0 / 8.0,
+    'rare':     7.0 / 8.0,
+    'uncommon': 3.0,
+    'common':   10.0,
+}
+
 
 #
 # Call either:
@@ -323,9 +342,10 @@ nameToNPacks = {
 # storeToFiles()
 #
 def main():
-    # reportExpectedValues(minPrice=100)
+    reportExpectedValues(exclPrice=2)
 
-    reportSet('Eternal Masters', minPrice=5)
+    # setStats = getSetStats('Iconic Masters', exclPrice=2)
+    # pprint(setStats)
 
     
 main()
