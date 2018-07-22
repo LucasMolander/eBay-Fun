@@ -2,24 +2,28 @@ import urllib
 import requests
 import json
 import sys
+import statistics
+import copy
 from pprint import pprint
 
 #
 # Call this one more often.
 #
-def reportExpectedValues():
+def reportExpectedValues(minPrice=0):
     setNameToSetCards = _loadFromFiles()
 
     setNameToBoxEV = {}
 
-    for setName in setNameToSetCards:
+    setNamesSorted = sorted(list(setNameToSetCards.keys()))
+
+    for setName in setNamesSorted:
         cards = setNameToSetCards[setName]
 
         setReportTitle = '%s (%d cards total)' % (setName, len(cards))
         dashes = '-' * len(setReportTitle)
         print('\n%s\n%s' % (setReportTitle, dashes))
 
-        evPerBox = getBoxEV(setName, cards)
+        evPerBox = getBoxEV(setName, cards, minPrice=minPrice)
 
         setNameToBoxEV[setName] = evPerBox
 
@@ -88,53 +92,102 @@ def _getCardsForSet(code):
     return cards
 
 
-def getCardsStats(cards):
-
+def getCardsStats(cards, minPrice=0):
     ret = {
-        'nMythics':       0,
-        'nRares':         0,
-        'nUncommons':     0,
-        'nCommons':       0,
-        'mythicTotal':    0.0,
-        'rareTotal':      0.0,
-        'uncommonTotal':  0.0,
-        'commonTotal':    0.0,
-        'mythicPrices':   {},   # Individual card prices
-        'rarePrices':     {},   # Individual card prices
-        'uncommonPrices': {},   # Individual card prices
-        'commonPrices':   {}    # Individual card prices
+        'mythic': {
+            'all': {
+                'n': 0,
+                'prices': {},
+                'priceSum': 0.0,
+                'priceAvg': 0.0,
+                'priceMed': 0.0
+            },
+            'exclusive': {
+                'n': 0,
+                'prices': {},
+                'priceSum': 0.0,
+                'priceAvg': 0.0,
+                'priceMed': 0.0
+            }
+        },
+        'rare': {
+            'all': {
+                'n': 0,
+                'prices': {},
+                'priceSum': 0.0,
+                'priceAvg': 0.0,
+                'priceMed': 0.0
+            },
+            'exclusive': {
+                'n': 0,
+                'prices': {},
+                'priceSum': 0.0,
+                'priceAvg': 0.0,
+                'priceMed': 0.0
+            }
+        },
+        'uncommon': {
+            'all': {
+                'n': 0,
+                'prices': {},
+                'priceSum': 0.0,
+                'priceAvg': 0.0,
+                'priceMed': 0.0
+            },
+            'exclusive': {
+                'n': 0,
+                'prices': {},
+                'priceSum': 0.0,
+                'priceAvg': 0.0,
+                'priceMed': 0.0
+            }
+        },
+        'common': {
+            'all': {
+                'n': 0,
+                'prices': {},
+                'priceSum': 0.0,
+                'priceAvg': 0.0,
+                'priceMed': 0.0
+            },
+            'exclusive': {
+                'n': 0,
+                'prices': {},
+                'priceSum': 0.0,
+                'priceAvg': 0.0,
+                'priceMed': 0.0
+            }
+        }
     }
 
     for c in cards:
         name = c['name']
         price = float(c['usd']) if 'usd' in c else 0.0
-        rarity = c['rarity']
-        if (rarity == 'mythic'):
-            ret['nMythics']          += 1
-            ret['mythicTotal']       += price
-            ret['mythicPrices'][name] = price
-        elif (rarity == 'rare'):
-            ret['nRares']          += 1
-            ret['rareTotal']       += price
-            ret['rarePrices'][name] = price
-        elif (rarity == 'uncommon'):
-            ret['nUncommons']          += 1
-            ret['uncommonTotal']       += price
-            ret['uncommonPrices'][name] = price
-        elif (rarity == 'common'):
-            ret['nCommons']          += 1
-            ret['commonTotal']       += price
-            ret['commonPrices'][name] = price
 
-    return ret
+        bucket = ret[c['rarity']]
 
-def getAverages(cardStats):
-    ret = {}
+        bucket['all']['n']           += 1
+        bucket['all']['prices'][name] = price
 
-    ret['avgMythicPrice']   = cardStats['mythicTotal'] / cardStats['nMythics'] if (cardStats['nMythics'] != 0) else 0
-    ret['avgRarePrice']     = cardStats['rareTotal'] / cardStats['nRares'] if (cardStats['nRares'] != 0) else 0
-    ret['avgUncommonPrice'] = cardStats['uncommonTotal'] / cardStats['nUncommons'] if (cardStats['nUncommons'] != 0) else 0
-    ret['avgCommonPrice']   = cardStats['commonTotal'] / cardStats['nCommons'] if (cardStats['nCommons'] != 0) else 0
+        if (price >= minPrice):
+            bucket['exclusive']['n']           += 1
+            bucket['exclusive']['prices'][name] = price
+
+    for rarity in ret:
+        bucket = ret[rarity]
+
+        for subset in bucket:
+            innerBucket = bucket[subset]
+
+            priceValues = list(innerBucket['prices'].values())
+            if (len(priceValues) > 0):
+                innerBucket['priceSum'] = sum(priceValues)
+                innerBucket['priceAvg'] = statistics.mean(priceValues)
+                innerBucket['priceMed'] = statistics.median(priceValues)
+            else:
+                innerBucket['priceSum'] = 0.0
+                innerBucket['priceAvg'] = 0.0
+                innerBucket['priceMed'] = 0.0
 
     return ret
 
@@ -154,10 +207,9 @@ def getValueAdds(averages):
 
     return ret
 
-def getBoxEV(setName, cards):
-    stats     = getCardsStats(cards)
-    averages  = getAverages(stats)
-    valueAdds = getValueAdds(averages)
+def getBoxEV(setName, cards, minPrice=0):
+    stats     = getCardsStats(cards, minPrice=minPrice)
+    valueAdds = getValueAdds(stats)
     
     print('Averages:')
     pprint(averages)
@@ -172,6 +224,41 @@ def getBoxEV(setName, cards):
     print('EV per box: %.2f\n\n' % evPerBox)
 
     return evPerBox
+
+def reportSet(setName, minPrice=0):
+    setNameToSetCards = _loadFromFiles()
+    cards = setNameToSetCards['Eternal Masters']
+    stats = getCardsStats(cards, minPrice=minPrice)
+
+    title = setName + ((' (minPrice=%s)' % minPrice) if minPrice > 0 else '')
+    print('\n%s\n%s' % (title, '-' * len(title)))
+
+    for rarity in ['mythic', 'rare', 'uncommon', 'common']:
+        print(rarity)
+        bucket = stats[rarity]
+        for innerBucket in bucket:
+
+            if (minPrice == 0 and innerBucket == 'exclusive'):
+                continue
+
+            print('\t%s' % innerBucket)
+
+            innerStats = copy.deepcopy(bucket[innerBucket])
+            del innerStats['prices']
+
+            for s in innerStats:
+                print('\t\t%s: %s' % (s, innerStats[s]))
+            
+        print('')
+            
+
+    # pprint(stats)
+    exit()
+
+    print('Mythic total: %s (average = %s)' % (stats['mythicTotal'], averages['avgMythicPrice']))
+    print('Rare total: %s (average = %s)' % (stats['mythicTotal'], averages['avgMythicPrice']))
+    print('Mythic total: %s (average = %s)' % (stats['mythicTotal'], averages['avgMythicPrice']))
+    print('Mythic total: %s (average = %s)' % (stats['mythicTotal'], averages['avgMythicPrice']))
 
 
 nameToCode = {
@@ -236,8 +323,18 @@ nameToNPacks = {
 # storeToFiles()
 #
 def main():
-    reportExpectedValues()
+    # reportExpectedValues(minPrice=100)
+
+    reportSet('Eternal Masters', minPrice=5)
 
     
-    
 main()
+
+#
+# Eternal Masters:
+#   0:  248
+#   5:  159
+#   10: 142
+#   15: 126
+#   20: 107
+#
