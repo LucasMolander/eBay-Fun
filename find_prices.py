@@ -37,6 +37,10 @@ def getHTML(item, guards, tIndex, out):
 
     r = requests.get(finalURL)
 
+    # Debugging: Output the HTML to a file
+    if (tIndex == 0):
+        print(r.text)
+
     out[tIndex] = r.text
 
 
@@ -66,8 +70,8 @@ def getMedianPriceSold(HTML, removes, requires, tIndex, out):
     # class="bold bidsold"><span class="sboffer">$55.00</span></span></li>
     # class="bold bidsold">$50.00</span></li>
     #
-    titles = re.findall(r'(?<=Click this link to access )[^>]+(?=\">)', HTML)
-    prices = re.findall(r'(?<=bidsold\">)<?[^<]*(?=<)', HTML)
+    titles = re.findall(r'(?<=</div>)[^<]*', HTML)
+    prices = re.findall(r'(?<=POSITIVE">)[^<]*', HTML)
 
     # Don't want to consider offers that were taken. Need a definite price.
     removeOffersTaken(titles, prices)

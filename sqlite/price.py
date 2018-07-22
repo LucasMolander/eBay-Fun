@@ -67,8 +67,8 @@ class PriceScanner(object):
         # OLD
         # titles = re.findall(r'(?<=Click this link to access )[^>]+(?=\">)', HTML)
         # prices = re.findall(r'(?<=bidsold\">)<?[^<]*(?=<)', HTML)
-        titles = re.findall(r'(?<=<\/div><\/div>)<?[^<]*(?=<\/h3>)', HTML)
-        prices = re.findall(r'(?<=<span class=")[A-Za-z0-9-_ ]*POSITIVE">\$\d+\.\d+(?=<\/span>)', HTML)
+        titles = re.findall(r'(?<=<\/div>)[^<]*', HTML)
+        prices = re.findall(r'(?<=POSITIVE">)[^<]*', HTML)
 
         
 
@@ -148,6 +148,9 @@ class PriceScanner(object):
             item = card[0] + ' ' + setName + ' mtg ' + foilStr
 
             args = (item, guards, i, HTMLOut)
+
+            print('{0}: {1}'.format(i, item))
+
             t = threading.Thread(target=PriceScanner.getHTML, args=args)
             threads.append(t)
 
