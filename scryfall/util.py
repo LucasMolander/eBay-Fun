@@ -5,6 +5,8 @@ import sys
 import statistics
 import copy
 from pprint import pprint
+from scipy.stats import kurtosis
+from scipy.stats import skew
 
 #
 # Call this one more often.
@@ -31,12 +33,19 @@ def reportExpectedValues(exclPrice=0):
 
         print(setName)
         print('-' * len(setName))
-        for ev in evs:
-            print('%s\t%s' % (ev, evs[ev]))
+        sortedEVs = sorted(list(evs.keys()))
+        for ev in sortedEVs:
+            val = evs[ev]
+            ds = '$' if (ev not in ['kurt', 'skew']) else ''
+            print('%s\t%s%.2f' % (ev, ds, val))
         print('\n')
 
 
-def _loadFromFiles():
+def _loadFromFiles(only=None):
+    if (only):
+        with open(only, 'r') as f:
+            return json.loads(f.read())
+
     nameToCards = {}
 
     for name in nameToCode:
@@ -270,7 +279,32 @@ def getSetStats(setName, cards, exclPrice=0):
     # print('All EV by med: %s' % totalVA)
     # print('\t(%s per box)\n' % (totalVA * nPacks))
 
+    # Skewness
+    for rarity in stats:
+        allPriceValues = list(bucket['all']['prices'].values())
+        ret['kurt'] = kurtosis(allPriceValues)
+        ret['skew'] = skew(allPriceValues)
+
     return ret
+
+
+def reportSet(setName):
+    cards = _loadFromFiles(only=setName)
+
+    stats = getCardsStats(cards)
+
+    for rarity in stats:
+        bucket = stats[rarity]
+        descStats = bucket['all']
+        cardToPrice = descStats['prices']
+
+        print('\n%s\n%s' % (rarity, ('-' * len(rarity))))
+        print('(avg=%.2f, med=%.2f)' % (descStats['avg'], descStats['med']))
+
+        for key, value in sorted(cardToPrice.iteritems(), reverse=True, key=lambda (k,v): (v,k)):
+            print "%s: %s" % (key, value)
+
+    print('')
 
 
 nameToCode = {
@@ -339,15 +373,20 @@ rarityToProbability = {
 # Call either:
 # reportExpectedValues()
 # or
+# reportSet('Set name')
+# or
 # storeToFiles()
 #
 def main():
-    reportExpectedValues(exclPrice=2)
+    # storeToFiles()
+
+    # reportExpectedValues(exclPrice=2)
 
     # setStats = getSetStats('Iconic Masters', exclPrice=2)
     # pprint(setStats)
 
-    
+    reportSet('Masters 25')
+
 main()
 
 #
