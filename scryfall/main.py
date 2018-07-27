@@ -4,6 +4,7 @@ import json
 import sys
 import statistics
 import copy
+import argparse
 from pprint import pprint
 from scipy.stats import kurtosis
 from scipy.stats import skew
@@ -11,7 +12,24 @@ from scipy.stats import skew
 #
 # Call this one more often.
 #
-def reportExpectedValues(exclPrice=0):
+def reportExpectedValues(args):
+    exclPrice = args.exclPrice
+    name = args.setName
+
+    print('\nBoxes and their expected values:')
+    if (exclPrice > 0):
+        print('(EXCLUSIVE PRICE $%s)' % exclPrice)
+    print('')
+
+    if (name):
+        cards = _loadFromFiles(only=name)
+        setStats = getSetStats(name, cards, exclPrice=exclPrice)
+
+        print(name)
+        print('-' * len(name))
+        _print_set_stats(setStats)
+        return
+
     setNameToSetCards = _loadFromFiles()
 
     setNameToBoxEVs = {}
@@ -23,23 +41,14 @@ def reportExpectedValues(exclPrice=0):
         setStats = getSetStats(setName, cards, exclPrice=exclPrice)
         setNameToBoxEVs[setName] = setStats
 
-    print('\nBoxes and their expected values:')
-    if (exclPrice > 0):
-        print('(EXCLUSIVE PRICE $%s)' % exclPrice)
-    print('')
     # pprint(setNameToBoxEVs)
     for setName in setNamesSorted:
         evs = setNameToBoxEVs[setName]
 
         print(setName)
         print('-' * len(setName))
-        sortedEVs = sorted(list(evs.keys()))
-        for ev in sortedEVs:
-            val = evs[ev]
-            ds = '$' if (ev not in ['kurt', 'skew']) else ''
-            print('%s\t%s%.2f' % (ev, ds, val))
-        print('\n')
-
+        _print_set_stats(evs)
+        
 
 def _loadFromFiles(only=None):
     if (only):
@@ -60,7 +69,7 @@ def _loadFromFiles(only=None):
 #
 # Call this only every once in a while.
 #
-def storeToFiles():
+def storeToFiles(args):
     for name in nameToCode:
         code = nameToCode[name]
 
@@ -70,6 +79,9 @@ def storeToFiles():
 
 
 def _getCardsForSet(code):
+    print('Getting cards for %s' % code)
+    sys.stdout.flush()
+
     cards = []
 
     baseURL = 'https://api.scryfall.com/cards/search?q='
@@ -88,11 +100,12 @@ def _getCardsForSet(code):
     cards.extend(response['data'])
 
     nCards = response['total_cards']
-    print('Getting %d cards for %s' % (nCards, code))
-    sys.stdout.flush()
 
     # Might be pagified
     while (response['has_more'] == True):
+        print('\tGetting more cards for %s...' % code)
+        sys.stdout.flush()
+
         url = response['next_page']
         r = requests.get(url)
 
@@ -287,13 +300,27 @@ def getSetStats(setName, cards, exclPrice=0):
 
     return ret
 
+def _print_set_stats(setStats):
+    sortedEVs = sorted(list(setStats.keys()))
+    for ev in sortedEVs:
+        val = setStats[ev]
+        ds = '$' if (ev not in ['kurt', 'skew']) else ''
 
-def reportSet(setName):
+        if (ev == 'exAvg' and val == None):
+            continue
+        else:
+            print('%s\t%s%.2f' % (ev, ds, val))
+
+    print('\n')
+
+def reportSet(args):
+    setName = args.name
+
     cards = _loadFromFiles(only=setName)
 
     stats = getCardsStats(cards)
 
-    for rarity in stats:
+    for rarity in ['mythic', 'rare', 'uncommon', 'common']:
         bucket = stats[rarity]
         descStats = bucket['all']
         cardToPrice = descStats['prices']
@@ -301,6 +328,7 @@ def reportSet(setName):
         print('\n%s\n%s' % (rarity, ('-' * len(rarity))))
         print('(avg=%.2f, med=%.2f)' % (descStats['avg'], descStats['med']))
 
+        # Sort by price descending
         for key, value in sorted(cardToPrice.iteritems(), reverse=True, key=lambda (k,v): (v,k)):
             print "%s: %s" % (key, value)
 
@@ -331,7 +359,8 @@ nameToCode = {
     'Shadows over Innistrad': 'soi',
     'Hour of Devastation':    'hou',
     'Amonkhet':               'akh',
-    'Ixalan':                 'xln'
+    'Ixalan':                 'xln',
+    'Magic Origins':          'ori'
 }
 
 nameToNPacks = {
@@ -358,7 +387,8 @@ nameToNPacks = {
     'Shadows over Innistrad': 36,
     'Hour of Devastation':    36,
     'Amonkhet':               36,
-    'Ixalan':                 36
+    'Ixalan':                 36,
+    'Magic Origins':          36
 }
 
 rarityToProbability = {
@@ -367,6 +397,10 @@ rarityToProbability = {
     'uncommon': 3.0,
     'common':   10.0,
 }
+
+
+class Ev(object):
+    pass
 
 
 #
@@ -378,6 +412,24 @@ rarityToProbability = {
 # storeToFiles()
 #
 def main():
+    parser = argparse.ArgumentParser()
+    subparsers = parser.add_subparsers()
+
+    parser_evs = subparsers.add_parser('evs')
+    parser_evs.add_argument('--exclPrice', type=float, default=0.0)
+    parser_evs.add_argument('--setName', type=str, default=None)
+    parser_evs.set_defaults(func=reportExpectedValues)
+
+    parser_evs = subparsers.add_parser('set')
+    parser_evs.add_argument('--name', type=str, required=True)
+    parser_evs.set_defaults(func=reportSet)
+
+    parser_evs = subparsers.add_parser('store')
+    parser_evs.set_defaults(func=storeToFiles)
+
+    args = parser.parse_args()
+    args.func(args)
+
     # storeToFiles()
 
     # reportExpectedValues(exclPrice=2)
@@ -385,7 +437,7 @@ def main():
     # setStats = getSetStats('Iconic Masters', exclPrice=2)
     # pprint(setStats)
 
-    reportSet('Masters 25')
+    # reportSet('Masters 25')
 
 main()
 
