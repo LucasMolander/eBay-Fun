@@ -360,7 +360,9 @@ nameToCode = {
     'Hour of Devastation':    'hou',
     'Amonkhet':               'akh',
     'Ixalan':                 'xln',
-    'Magic Origins':          'ori'
+    'Magic Origins':          'ori',
+    'Core Set 2019':          'm19',
+    'Magic 2011':             'm11'
 }
 
 nameToNPacks = {
@@ -388,7 +390,9 @@ nameToNPacks = {
     'Hour of Devastation':    36,
     'Amonkhet':               36,
     'Ixalan':                 36,
-    'Magic Origins':          36
+    'Magic Origins':          36,
+    'Core Set 2019':          36,
+    'Magic 2011':             36
 }
 
 rarityToProbability = {
