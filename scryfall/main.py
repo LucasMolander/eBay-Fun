@@ -77,6 +77,13 @@ def storeToFiles(args):
         with open(name, 'w') as f:
             f.write(json.dumps(cards))
 
+    for name in nameToCodeOld:
+        code = nameToCodeOld[name]
+
+        cards = _getCardsForSet(code)
+        with open(name, 'w') as f:
+            f.write(json.dumps(cards))
+
 
 def _getCardsForSet(code):
     print('Getting cards for %s' % code)
@@ -363,6 +370,21 @@ nameToCode = {
     'Magic Origins':          'ori',
     'Core Set 2019':          'm19',
     'Magic 2011':             'm11'
+}
+
+nameToCodeOld = {
+    'Alpha':     'lea',
+    'Beta':      'leb',
+    'Unlimited': '2ed',
+    'Collector\'s Edition': 'ced',
+    'Arabian Nights': 'arn',
+    'Antiquities': 'atq',
+    'Revised': '3ed',
+    'Legends': 'leg',
+    'The Dark': 'drk',
+    'Fallen Empires': 'fem',
+    'Fourth Edition': '4ed',
+    'Ice Age': 'ice'
 }
 
 nameToNPacks = {
