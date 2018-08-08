@@ -1,0 +1,159 @@
+
+
+class StatsUtil(object):
+	def getCardsStats(cards, exclPrice=0):
+	    ret = {
+	        'mythic': {
+	            'all': {
+	                'n': 0,
+	                'prices': {},
+	                'priceSum': 0.0,
+	                'priceAvg': 0.0,
+	                'priceMed': 0.0
+	            },
+	            'exclusive': {
+	                'n': 0,
+	                'prices': {},
+	                'priceSum': 0.0,
+	                'priceAvg': 0.0,
+	                'priceMed': 0.0
+	            }
+	        },
+	        'rare': {
+	            'all': {
+	                'n': 0,
+	                'prices': {},
+	                'priceSum': 0.0,
+	                'priceAvg': 0.0,
+	                'priceMed': 0.0
+	            },
+	            'exclusive': {
+	                'n': 0,
+	                'prices': {},
+	                'priceSum': 0.0,
+	                'priceAvg': 0.0,
+	                'priceMed': 0.0
+	            }
+	        },
+	        'uncommon': {
+	            'all': {
+	                'n': 0,
+	                'prices': {},
+	                'priceSum': 0.0,
+	                'priceAvg': 0.0,
+	                'priceMed': 0.0
+	            },
+	            'exclusive': {
+	                'n': 0,
+	                'prices': {},
+	                'priceSum': 0.0,
+	                'priceAvg': 0.0,
+	                'priceMed': 0.0
+	            }
+	        },
+	        'common': {
+	            'all': {
+	                'n': 0,
+	                'prices': {},
+	                'priceSum': 0.0,
+	                'priceAvg': 0.0,
+	                'priceMed': 0.0
+	            },
+	            'exclusive': {
+	                'n': 0,
+	                'prices': {},
+	                'priceSum': 0.0,
+	                'priceAvg': 0.0,
+	                'priceMed': 0.0
+	            }
+	        }
+	    }
+
+	    for c in cards:
+	        name = c['name']
+	        price = float(c['usd']) if 'usd' in c else 0.0
+
+	        bucket = ret[c['rarity']]
+
+	        bucket['all']['n']           += 1
+	        bucket['all']['prices'][name] = price
+
+	        if (price >= exclPrice):
+	            bucket['exclusive']['n'] += 1 
+	            bucket['exclusive']['prices'][name] = price
+	        else:
+	            bucket['exclusive']['prices'][name] = 0
+
+	    for rarity in ret:
+	        bucket = ret[rarity]
+
+	        for subset in bucket:
+	            innerBucket = bucket[subset]
+
+	            priceValues = list(innerBucket['prices'].values())
+	            if (len(priceValues) > 0):
+
+	                p = rarityToProbability[rarity]
+
+	                innerBucket['sum']       = sum(priceValues)
+	                innerBucket['avg']       = statistics.mean(priceValues)
+	                innerBucket['med']       = statistics.median(priceValues)
+	                innerBucket['avgValAdd'] = innerBucket['avg'] * p
+	                innerBucket['medValAdd'] = innerBucket['med'] * p
+	            else:
+	                innerBucket['sum']       = 0.0
+	                innerBucket['avg']       = 0.0
+	                innerBucket['med']       = 0.0
+	                innerBucket['avgValAdd'] = 0.0
+	                innerBucket['medValAdd'] = 0.0
+
+	    return ret
+
+	def getSetStats(setName, cardsStats, exclPrice=0):
+	    ret = {}
+
+	    nPacks = sets[setName]['nPacks']
+
+	    #
+	    # Calculate overall expected values
+	    #
+	    if (exclPrice > 0):
+	        # Average of cards that meet minimum price
+	        totalVA = 0.0
+	        for rarity in stats:
+	            bucket = stats[rarity]
+	            totalVA += bucket['exclusive']['avgValAdd']
+
+	        ret['exAvg'] = totalVA * nPacks
+	        # print('Exclusive EV by avg: %s' % totalVA)
+	        # print('\t(%s per box)\n' % (totalVA * nPacks))
+	    else:
+	        ret['exAvg'] = None
+
+	    # Average of all cards
+	    totalVA = 0.0
+	    for rarity in stats:
+	        bucket = stats[rarity]
+	        totalVA += bucket['all']['avgValAdd']
+
+	    ret['allAvg'] = totalVA * nPacks
+	    # print('All EV by avg: %s' % totalVA)
+	    # print('\t(%s per box)\n' % (totalVA * nPacks))
+
+	    # Median of all cards
+	    totalVA = 0.0
+	    for rarity in stats:
+	        bucket = stats[rarity]
+	        totalVA += bucket['all']['medValAdd']
+
+	    ret['allMed'] = totalVA * nPacks
+	    # print('All EV by med: %s' % totalVA)
+	    # print('\t(%s per box)\n' % (totalVA * nPacks))
+
+	    # Skewness
+	    for rarity in stats:
+	        allPriceValues = list(bucket['all']['prices'].values())
+	        ret['kurt'] = kurtosis(allPriceValues)
+	        ret['skew'] = skew(allPriceValues)
+
+	    return ret

@@ -9,81 +9,6 @@ from pprint import pprint
 from scipy.stats import kurtosis
 from scipy.stats import skew
 
-#
-# Call this one more often.
-#
-def reportExpectedValues(args):
-    exclPrice = args.exclPrice
-    name = args.setName
-
-    print('\nBoxes and their expected values:')
-    if (exclPrice > 0):
-        print('(EXCLUSIVE PRICE $%s)' % exclPrice)
-    print('')
-
-    if (name):
-        cards = _loadFromFiles(only=name)
-        setStats = getSetStats(name, cards, exclPrice=exclPrice)
-
-        print(name)
-        print('-' * len(name))
-        _print_set_stats(setStats)
-        return
-
-    setNameToSetCards = _loadFromFiles()
-
-    setNameToBoxEVs = {}
-
-    setNamesSorted = sorted(list(setNameToSetCards.keys()))
-
-    for setName in setNamesSorted:
-        cards = setNameToSetCards[setName]
-        setStats = getSetStats(setName, cards, exclPrice=exclPrice)
-        setNameToBoxEVs[setName] = setStats
-
-    # pprint(setNameToBoxEVs)
-    for setName in setNamesSorted:
-        evs = setNameToBoxEVs[setName]
-
-        print(setName)
-        print('-' * len(setName))
-        _print_set_stats(evs)
-        
-
-def _loadFromFiles(only=None):
-    if (only):
-        with open(only, 'r') as f:
-            return json.loads(f.read())
-
-    nameToCards = {}
-
-    for name in nameToCode:
-        with open(name, 'r') as f:
-            cards = json.loads(f.read())
-
-        nameToCards[name] = cards
-
-    return nameToCards
-
-
-#
-# Call this only every once in a while.
-#
-def storeToFiles(args):
-    for name in nameToCode:
-        code = nameToCode[name]
-
-        cards = _getCardsForSet(code)
-        with open(name, 'w') as f:
-            f.write(json.dumps(cards))
-
-    for name in nameToCodeOld:
-        code = nameToCodeOld[name]
-
-        cards = _getCardsForSet(code)
-        with open(name, 'w') as f:
-            f.write(json.dumps(cards))
-
 
 def _getCardsForSet(code):
     print('Getting cards for %s' % code)
@@ -126,187 +51,6 @@ def _getCardsForSet(code):
     return cards
 
 
-def getCardsStats(cards, exclPrice=0):
-    ret = {
-        'mythic': {
-            'all': {
-                'n': 0,
-                'prices': {},
-                'priceSum': 0.0,
-                'priceAvg': 0.0,
-                'priceMed': 0.0
-            },
-            'exclusive': {
-                'n': 0,
-                'prices': {},
-                'priceSum': 0.0,
-                'priceAvg': 0.0,
-                'priceMed': 0.0
-            }
-        },
-        'rare': {
-            'all': {
-                'n': 0,
-                'prices': {},
-                'priceSum': 0.0,
-                'priceAvg': 0.0,
-                'priceMed': 0.0
-            },
-            'exclusive': {
-                'n': 0,
-                'prices': {},
-                'priceSum': 0.0,
-                'priceAvg': 0.0,
-                'priceMed': 0.0
-            }
-        },
-        'uncommon': {
-            'all': {
-                'n': 0,
-                'prices': {},
-                'priceSum': 0.0,
-                'priceAvg': 0.0,
-                'priceMed': 0.0
-            },
-            'exclusive': {
-                'n': 0,
-                'prices': {},
-                'priceSum': 0.0,
-                'priceAvg': 0.0,
-                'priceMed': 0.0
-            }
-        },
-        'common': {
-            'all': {
-                'n': 0,
-                'prices': {},
-                'priceSum': 0.0,
-                'priceAvg': 0.0,
-                'priceMed': 0.0
-            },
-            'exclusive': {
-                'n': 0,
-                'prices': {},
-                'priceSum': 0.0,
-                'priceAvg': 0.0,
-                'priceMed': 0.0
-            }
-        }
-    }
-
-    for c in cards:
-        name = c['name']
-        price = float(c['usd']) if 'usd' in c else 0.0
-
-        bucket = ret[c['rarity']]
-
-        bucket['all']['n']           += 1
-        bucket['all']['prices'][name] = price
-
-        if (price >= exclPrice):
-            bucket['exclusive']['n'] += 1 
-            bucket['exclusive']['prices'][name] = price
-        else:
-            bucket['exclusive']['prices'][name] = 0
-
-    for rarity in ret:
-        bucket = ret[rarity]
-
-        for subset in bucket:
-            innerBucket = bucket[subset]
-
-            priceValues = list(innerBucket['prices'].values())
-            if (len(priceValues) > 0):
-
-                p = rarityToProbability[rarity]
-
-                innerBucket['sum']       = sum(priceValues)
-                innerBucket['avg']       = statistics.mean(priceValues)
-                innerBucket['med']       = statistics.median(priceValues)
-                innerBucket['avgValAdd'] = innerBucket['avg'] * p
-                innerBucket['medValAdd'] = innerBucket['med'] * p
-            else:
-                innerBucket['sum']       = 0.0
-                innerBucket['avg']       = 0.0
-                innerBucket['med']       = 0.0
-                innerBucket['avgValAdd'] = 0.0
-                innerBucket['medValAdd'] = 0.0
-
-    return ret
-
-
-def getSetStats(setName, cards, exclPrice=0):
-    ret = {}
-
-    stats = getCardsStats(cards, exclPrice=exclPrice)
-
-    # title = setName + ((' (exclPrice=%s)' % exclPrice) if exclPrice > 0 else '')
-    # print('\n%s\n%s' % (title, '-' * len(title)))
-
-    # for rarity in stats:
-    #     print(rarity)
-    #     bucket = stats[rarity]
-    #     for innerBucket in bucket:
-
-    #         if (exclPrice == 0 and innerBucket == 'exclusive'):
-    #             continue
-
-    #         print('\t%s' % innerBucket)
-
-    #         innerStats = copy.deepcopy(bucket[innerBucket])
-    #         del innerStats['prices']
-
-    #         for s in innerStats:
-    #             print('\t\t%s: %s' % (s, innerStats[s]))
-            
-    #     print('')
-
-    nPacks = nameToNPacks[setName]
-
-    #
-    # Calculate overall expected values
-    #
-    if (exclPrice > 0):
-        # Average of cards that meet minimum price
-        totalVA = 0.0
-        for rarity in stats:
-            bucket = stats[rarity]
-            totalVA += bucket['exclusive']['avgValAdd']
-
-        ret['exAvg'] = totalVA * nPacks
-        # print('Exclusive EV by avg: %s' % totalVA)
-        # print('\t(%s per box)\n' % (totalVA * nPacks))
-    else:
-        ret['exAvg'] = None
-
-    # Average of all cards
-    totalVA = 0.0
-    for rarity in stats:
-        bucket = stats[rarity]
-        totalVA += bucket['all']['avgValAdd']
-
-    ret['allAvg'] = totalVA * nPacks
-    # print('All EV by avg: %s' % totalVA)
-    # print('\t(%s per box)\n' % (totalVA * nPacks))
-
-    # Median of all cards
-    totalVA = 0.0
-    for rarity in stats:
-        bucket = stats[rarity]
-        totalVA += bucket['all']['medValAdd']
-
-    ret['allMed'] = totalVA * nPacks
-    # print('All EV by med: %s' % totalVA)
-    # print('\t(%s per box)\n' % (totalVA * nPacks))
-
-    # Skewness
-    for rarity in stats:
-        allPriceValues = list(bucket['all']['prices'].values())
-        ret['kurt'] = kurtosis(allPriceValues)
-        ret['skew'] = skew(allPriceValues)
-
-    return ret
-
 def _print_set_stats(setStats):
     sortedEVs = sorted(list(setStats.keys()))
     for ev in sortedEVs:
@@ -320,102 +64,171 @@ def _print_set_stats(setStats):
 
     print('\n')
 
-def reportSet(args):
-    setName = args.name
-
-    cards = _loadFromFiles(only=setName)
-
-    stats = getCardsStats(cards)
-
-    for rarity in ['mythic', 'rare', 'uncommon', 'common']:
-        bucket = stats[rarity]
-        descStats = bucket['all']
-        cardToPrice = descStats['prices']
-
-        print('\n%s\n%s' % (rarity, ('-' * len(rarity))))
-        print('(avg=%.2f, med=%.2f)' % (descStats['avg'], descStats['med']))
-
-        # Sort by price descending
-        for key, value in sorted(cardToPrice.iteritems(), reverse=True, key=lambda (k,v): (v,k)):
-            print "%s: %s" % (key, value)
-
-    print('')
 
 
-nameToCode = {
-    'Eternal Masters':        'ema',
-    'Modern Masters':         'mma',
-    'Modern Masters 2015':    'mm2',
-    'Modern Masters 2017':    'mm3',
-    'Iconic Masters':         'ima',
-    'Masters 25':             'a25',
-    'Worldwake':              'wwk',
-    'Kaladesh':               'kld',
-    'Scars of Mirrodin':      'som',
-    'New Phyrexia':           'nph',
-    'Coldsnap':               'csp',
-    'Khans of Tarkir':        'ktk',
-    'Zendikar':               'zen',
-    'Innistrad':              'isd',
-    'Dark Ascension':         'dka',
-    'Avacyn Restored':        'avr',
-    'Return to Ravnica':      'rtr',
-    'Gatecrash':              'gtc',
-    'Battle for Zendikar':    'bfz',
-    'Aether Revolt':          'aer',
-    'Shadows over Innistrad': 'soi',
-    'Hour of Devastation':    'hou',
-    'Amonkhet':               'akh',
-    'Ixalan':                 'xln',
-    'Magic Origins':          'ori',
-    'Core Set 2019':          'm19',
-    'Magic 2011':             'm11'
+#
+# TODO
+#
+# The map used to be called 'nameToCode'. Go through and update where that appeared!!!
+#
+
+# Name to set object, which has code, nPacks, and old
+sets = {
+    'Eternal Masters': {
+        'code':   'ema',
+        'nPacks': 24,
+        'old':    False
+    },
+    'Modern Masters': {
+        'code':   'mma',
+        'nPacks': 24,
+        'old':    False
+    },
+    'Modern Masters 2015': {
+        'code':   'mm2',
+        'nPacks': 24,
+        'old':    False
+    },
+    'Modern Masters 2017': {
+        'code':   'mm3',
+        'nPacks': 24,
+        'old':    False
+    },
+    'Iconic Masters': {
+        'code':   'ima',
+        'nPacks': 24,
+        'old':    False
+    },
+    'Masters 25': {
+        'code':   'a25',
+        'nPacks': 24,
+        'old':    False
+    },
+    'Worldwake': {
+        'code':   'wwk',
+        'nPacks': 36,
+        'old':    False
+    },
+    'Kaladesh': {
+        'code':   'kld',
+        'nPacks': 36,
+        'old':    False
+    },
+    'Scars of Mirrodin': {
+        'code':   'som',
+        'nPacks': 36,
+        'old':    False
+    },
+    'New Phyrexia': {
+        'code':   'nph',
+        'nPacks': 36,
+        'old':    False
+    },
+    'Coldsnap': {
+        'code':   'csp',
+        'nPacks': 36,
+        'old':    False
+    },
+    'Khans of Tarkir': {
+        'code':   'ktk',
+        'nPacks': 36,
+        'old':    False
+    },
+    'Zendikar': {
+        'code':   'zen',
+        'nPacks': 36,
+        'old':    False
+    },
+    'Innistrad': {
+        'code':   'isd',
+        'nPacks': 36,
+        'old':    False
+    },
+    'Dark Ascension': {
+        'code':   'dka',
+        'nPacks': 36,
+        'old':    False
+    },
+    'Avacyn Restored': {
+        'code':   'avr',
+        'nPacks': 36,
+        'old':    False
+    },
+    'Return to Ravnica': {
+        'code':   'rtr',
+        'nPacks': 36,
+        'old':    False
+    },
+    'Gatecrash': {
+        'code':   'gtc',
+        'nPacks': 36,
+        'old':    False
+    },
+    'Battle for Zendikar': {
+        'code':   'bfz',
+        'nPacks': 36,
+        'old':    False
+    },
+    'Aether Revolt': {
+        'code':   'aer',
+        'nPacks': 36,
+        'old':    False
+    },
+    'Shadows over Innistrad': {
+        'code':   'soi',
+        'nPacks': 36,
+        'old':    False
+    },
+    'Hour of Devastation': {
+        'code':   'hou',
+        'nPacks': 36,
+        'old':    False
+    },
+    'Amonkhet': {
+        'code':   'akh',
+        'nPacks': 36,
+        'old':    False
+    },
+    'Ixalan': {
+        'code':   'xln',
+        'nPacks': 36,
+        'old':    False
+    },
+    'Magic Origins': {
+        'code':   'ori',
+        'nPacks': 36,
+        'old':    False
+    },
+    'Core Set 2019': {
+        'code':   'm19',
+        'nPacks': 36,
+        'old':    False
+    },
+    'Magic 2011': {
+        'code':   'm11',
+        'nPacks': 36,
+        'old':    False
+    }
 }
 
-nameToCodeOld = {
-    'Alpha':     'lea',
-    'Beta':      'leb',
-    'Unlimited': '2ed',
-    'Collector\'s Edition': 'ced',
-    'Arabian Nights': 'arn',
-    'Antiquities': 'atq',
-    'Revised': '3ed',
-    'Legends': 'leg',
-    'The Dark': 'drk',
-    'Fallen Empires': 'fem',
-    'Fourth Edition': '4ed',
-    'Ice Age': 'ice'
-}
-
-nameToNPacks = {
-    'Eternal Masters':        24,
-    'Modern Masters':         24,
-    'Modern Masters 2015':    24,
-    'Modern Masters 2017':    24,
-    'Iconic Masters':         24,
-    'Masters 25':             24,
-    'Worldwake':              36,
-    'Kaladesh':               36,
-    'Scars of Mirrodin':      36,
-    'New Phyrexia':           36,
-    'Coldsnap':               36,
-    'Khans of Tarkir':        36,
-    'Zendikar':               36,
-    'Innistrad':              36,
-    'Dark Ascension':         36,
-    'Avacyn Restored':        36,
-    'Return to Ravnica':      36,
-    'Gatecrash':              36,
-    'Battle for Zendikar':    36,
-    'Aether Revolt':          36,
-    'Shadows over Innistrad': 36,
-    'Hour of Devastation':    36,
-    'Amonkhet':               36,
-    'Ixalan':                 36,
-    'Magic Origins':          36,
-    'Core Set 2019':          36,
-    'Magic 2011':             36
-}
+#
+# TODO
+# Care about this later
+#
+# nameToCodeOld = {
+#     'Alpha':     'lea',
+#     'Beta':      'leb',
+#     'Unlimited': '2ed',
+#     'Collector\'s Edition': 'ced',
+#     'Arabian Nights': 'arn',
+#     'Antiquities': 'atq',
+#     'Revised': '3ed',
+#     'Legends': 'leg',
+#     'The Dark': 'drk',
+#     'Fallen Empires': 'fem',
+#     'Fourth Edition': '4ed',
+#     'Ice Age': 'ice'
+# }
 
 rarityToProbability = {
     'mythic':   1.0 / 8.0,
@@ -456,22 +269,76 @@ def main():
     args = parser.parse_args()
     args.func(args)
 
-    # storeToFiles()
 
-    # reportExpectedValues(exclPrice=2)
 
-    # setStats = getSetStats('Iconic Masters', exclPrice=2)
-    # pprint(setStats)
+def reportExpectedValues(args):
+    exclPrice = args.exclPrice
+    name = args.setName
 
-    # reportSet('Masters 25')
+    print('\nBoxes and their expected values:')
+    if (exclPrice > 0):
+        print('(EXCLUSIVE PRICE $%s)' % exclPrice)
+    print('')
+
+    if (name):
+        cards = _loadFromFiles(only=name)
+        setStats = getSetStats(name, cards, exclPrice=exclPrice)
+
+        print(name)
+        print('-' * len(name))
+        _print_set_stats(setStats)
+        return
+
+    setNameToSetCards = _loadFromFiles()
+
+    setNameToBoxEVs = {}
+
+    setNamesSorted = sorted(list(setNameToSetCards.keys()))
+
+    for setName in setNamesSorted:
+        cards = setNameToSetCards[setName]
+        setStats = getSetStats(setName, cards, exclPrice=exclPrice)
+        setNameToBoxEVs[setName] = setStats
+
+    # pprint(setNameToBoxEVs)
+    for setName in setNamesSorted:
+        evs = setNameToBoxEVs[setName]
+
+        print(setName)
+        print('-' * len(setName))
+        _print_set_stats(evs)
+
+
+def reportSet(args):
+    setName = args.name
+
+    cards = _loadFromFiles(only=setName)
+
+    stats = getCardsStats(cards)
+
+    for rarity in ['mythic', 'rare', 'uncommon', 'common']:
+        bucket = stats[rarity]
+        descStats = bucket['all']
+        cardToPrice = descStats['prices']
+
+        print('\n%s\n%s' % (rarity, ('-' * len(rarity))))
+        print('(avg=%.2f, med=%.2f)' % (descStats['avg'], descStats['med']))
+
+        # Sort by price descending
+        for key, value in sorted(cardToPrice.iteritems(), reverse=True, key=lambda (k,v): (v,k)):
+            print "%s: %s" % (key, value)
+
+    print('')
+
+def storeToFiles(args):
+    for name in sets:
+        s = sets[name]
+        code = s['code']
+
+        cards = _getCardsForSet(code)
+        with open(name, 'w') as f:
+            f.write(json.dumps(cards))
+
 
 main()
 
-#
-# Eternal Masters:
-#   0:  248
-#   5:  159
-#   10: 142
-#   15: 126
-#   20: 107
-#
