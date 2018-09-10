@@ -163,6 +163,11 @@ class FileUtil(object):
             'code':   'm11',
             'nPacks': 36,
             'old':    False
+        },
+        'Dominaria': {
+            'code':   'dom',
+            'nPacks': 36,
+            'old':    False
         }
     }
 

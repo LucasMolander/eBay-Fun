@@ -1,5 +1,6 @@
 import argparse
 from pprint import pprint
+import json
 
 from file import FileUtil
 from stats import StatsUtil
@@ -27,6 +28,7 @@ def main():
     parser_evs.set_defaults(func=reportSet)
 
     parser_evs = subparsers.add_parser('store')
+    parser_evs.add_argument('--only', type=str)
     parser_evs.set_defaults(func=storeToFiles)
 
     args = parser.parse_args()
@@ -74,6 +76,7 @@ def reportExpectedValues(args):
         StatsUtil.printSetStats(evs)
 
 
+
 def reportSet(args):
     setName = args.name
 
@@ -94,14 +97,25 @@ def reportSet(args):
 
     print('')
 
+
+
 def storeToFiles(args):
-    for name in FileUtil.sets:
-        s = FileUtil.sets[name]
+    if (args.only):
+        s = FileUtil.sets[args.only]
         code = s['code']
 
         cards = FileUtil.getCardsForSet(code)
-        with open(name, 'w') as f:
+        with open(args.only, 'w') as f:
             f.write(json.dumps(cards))
+    else:
+        for name in FileUtil.sets:
+            s = FileUtil.sets[name]
+            code = s['code']
+
+            cards = FileUtil.getCardsForSet(code)
+            with open(name, 'w') as f:
+                f.write(json.dumps(cards))
+
 
 
 main()
